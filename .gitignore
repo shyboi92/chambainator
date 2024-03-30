@@ -1,0 +1,11 @@
+node_modules/
+sshCMD.txt
+audit.json
+
+.env
+data/backup/
+tmp/
+dist-dev/
+dist-prod/
+dist-fe-dev/
+dist-fe-prod/

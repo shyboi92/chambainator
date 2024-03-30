@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"rootDirs": ["./src", "./src/common"],
+		"outDir": "./dist-prod",
+		"allowJs": true,
+		"target": "es2020",
+		"module": "es2020",
+		"moduleResolution": "node",
+		"forceConsistentCasingInFileNames": true,
+		"allowSyntheticDefaultImports": true,
+		"sourceMap": false,
+		"removeComments": true
+	},
+	"include": ["./src/**/*"],
+	"exclude": ["./src/scripts/**/*", "./src/test/**/*"]
+}

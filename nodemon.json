@@ -1,0 +1,12 @@
+{   
+    "ignore": [
+		"node_modules/",
+		"src/",
+		"data/",
+		"tmp/",
+		"react-build/",
+		"dist-dev/public/",
+		"dist-dev/scripts/",
+		"dist-dev/test/"
+	]
+}
