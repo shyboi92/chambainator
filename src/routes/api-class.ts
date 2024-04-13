@@ -110,12 +110,11 @@ bindApiWithRoute(API_CLASS.CLASS__GET, api => apiRoute(router, api,
 
 
 bindApiWithRoute(API_CLASS.CLASS__LIST, api => apiRoute(router,api,
-	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
-		const r= await db.query("SELECT * FROM user_class WHERE user_id = ? AND class_id = ? ",[userInfo.id, req.api.params.class_id ])
+		const r= await db.query("SELECT * FROM user_class WHERE user_id = ?",[userInfo.id ])
 		const result = r[0]['user_id'];
 		const classesArray = r;
 

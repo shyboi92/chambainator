@@ -212,23 +212,26 @@ export const API_EXERCISE= {
 	},
 }
 
-export const API_SUBMISSION= {
+export const API_SUBMISSION = {
 	SUBMISSION__CREATE: {
 		url: '/api/submission/create',
 		method: 'post',
 		roles: AUTHENTICATED_ROLES
 	},
+
 	SUBMISSION__LIST: {
 		url: '/api/submission/list',
 		method: 'get',
 		roles: AUTHENTICATED_ROLES
 	},
+
 	SUBMISSION__GET: {
 		url: '/api/submission/get',
 		method: 'get',
 		roles: [Roles.SYSTEM_ADMIN]
 	},
 }
+
 export interface UserInfo {
 	id?: number;
 	username: string;

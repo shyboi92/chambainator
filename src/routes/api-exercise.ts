@@ -51,7 +51,7 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__DELETE, api => apiRoute( router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r= await db.query("SELECT course.user_id FROM exercise INNER JOIN course ON exercise.course_id = course.id WHERE exercise.id = ?",[req.api.params.class_id])
+		const r= await db.query("SELECT course.user_id FROM exercise INNER JOIN course ON exercise.course_id = course.id WHERE exercise.id = ?",[req.api.params.exercise_id])
 		const result = r[0]['user_id'];
 		
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
@@ -82,128 +82,39 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__UPDATE_INFO, api => apiRoute(router, api
 
 		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('UPDATE class SET name = ? startDate = ? endDate = ? where id = ?', [req.api.params.name, req.api.params.start_date,req.api.params.end_date,req.api.params.class_id]);
+		else await db.query('UPDATE exercise SET name = ? start_date = ? end_date = ? description = ? where id = ?', [req.api.params.name, req.api.params.start_date,req.api.params.end_date,req.api.params.description,req.api.params.exercise_id]);
 
-		req.ctx.logActivity('Sửa thông tin lớp học', { user_id: req.api.params.class_id });
+		req.ctx.logActivity('Sửa thông tin bai tap', { exercise_id: req.api.params.exercise_id });
 		req.api.sendSuccess();
 	}
 ))
 
 
-bindApiWithRoute(API_CLASS.CLASS__GET, api => apiRoute(router, api,
-	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+bindApiWithRoute(API_EXERCISE.EXERCISE__GET, api => apiRoute(router, api,
+	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT * FROM class WHERE id = ?", [req.api.params.class_id])
-		const classData = queryResult[0]
+		const queryResult = await db.query("SELECT * FROM exercise WHERE id = ?", [req.api.params.exercise_id])
+		const exerciseData = queryResult[0]
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		req.api.sendSuccess(classData)
+		req.api.sendSuccess(exerciseData)
 	}
 ))
 
 
-bindApiWithRoute(API_CLASS.CLASS__LIST, api => apiRoute(router,api,
+bindApiWithRoute(API_EXERCISE.EXERCISE__LIST, api => apiRoute(router,api,
 	apiValidatorParam(api, 'course_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT * FROM class INNER JOIN course ON class.course_id = course.id WHERE class.course_id = ?", [req.api.params.course_id])
-		const classesArray = queryResult
+		const queryResult = await db.query("SELECT * FROM exercise INNER JOIN course ON exercise.course_id = course.id WHERE exercise.course_id = ?", [req.api.params.course_id])
+		const exerciseArray = queryResult
 
-		req.api.sendSuccess({ courses: classesArray })
-	}
-))
-
-bindApiWithRoute(API_CLASS.CLASS__ADD__USER, api => apiRoute(router, api,
-	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
-	apiValidatorParam(api, 'user_id').notEmpty().isInt().toInt(),
-
-	async (req: ApiRequest, res: Response) => {
-		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r= await db.query("SELECT course.user_id FROM class INNER JOIN course ON class.course_id = course.id WHERE class.id = ?",[req.api.params.class_id])
-		const result = r[0]['user_id'];
-		
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-
-		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
-		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('INSERT INTO user_class(user_id,class_id) VALUES(?,?)', [req.api.params.user_id, req.api.params.class_id]);
-
-		req.ctx.logActivity('Them vao lớp học', { user_class_id: req.api.params.class_id });
-		req.api.sendSuccess();
-	}
-))
-
-bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api,
-	apiValidatorParam(api, 'user_id').notEmpty().isInt().toInt(),
-	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
-
-	async (req: ApiRequest, res: Response) => {
-		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r= await db.query("SELECT course.user_id FROM class INNER JOIN course ON class.course_id = course.id WHERE class.id = ?",[req.api.params.class_id])
-		const result = r[0]['user_id'];
-		
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-
-		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
-		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('DETELE FROM user_class(user_id,class_id) VALUES(?,?)', [req.api.params.user_id, req.api.params.class_id]);
-
-		req.ctx.logActivity('Them vao lớp học', { user_class_id: req.api.params.class_id });
-		req.api.sendSuccess();
-	}
-))
-
-bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
-	apiValidatorParam(api, 'enabled').optional().isBoolean().toBoolean(),
-	apiValidatorParam(api, 'paging.page').optional().isInt().toInt(),
-
-	async (req: ApiRequest, res: Response) => {
-		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-
-		const params: any[] = [];
-		const selectClause = 'select u.id, u.username, u.fullname, u.role, u.enabled, u.creation_time, u.last_login_time, u.last_update_time';
-		const fromClause = 'from user u';
-		let whereClause = 'where 1';
-
-		if (req.api.params.hasOwnProperty('enabled')) {
-			whereClause += ' and enabled = ?';
-			params.push(req.api.params.enabled);
-		}
-
-		const item_count = await db.queryValue(`select count(*) ${fromClause} ${whereClause}`, params) as number;
-		const page_count = Math.floor((item_count + config.LIST_ITEMS_PER_PAGE - 1) / config.LIST_ITEMS_PER_PAGE);
-
-		let query = `${selectClause} ${fromClause} ${whereClause}`;
-		if (req.api.params.paging?.page) {
-			if (req.api.params.paging?.page <= 0 || req.api.params.paging?.page > page_count) req.api.sendError(ErrorCodes.PAGE_OUT_OF_RANGE);
-			query += ` limit ${(req.api.params.paging.page - 1) * config.LIST_ITEMS_PER_PAGE}, ${config.LIST_ITEMS_PER_PAGE}`;
-		}
-
-		const list = await db.query(query, params);
-		req.api.sendSuccess({
-			item_count,
-			page_count,
-			user_info: list.map(e => {
-				const item: UserInfo = {
-					id: e.id,
-					username: e.username,
-					fullname: e.fullname,
-					role: e.role,
-					enabled: e.enabled == 1,
-					creation_time: e.creation_time,
-					last_login_time: e.last_login_time,
-					last_update_time: e.last_update_time,
-				}	
-				return item;
-			})
-		});
+		req.api.sendSuccess({ exercises: exerciseArray })
 	}
 ))
 
