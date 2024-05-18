@@ -18,7 +18,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	router, 
 	api,
 	
-	apiValidatorParam(api, 'exercise_id').trim().notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exam_cont_id').trim().notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'user_class_id').notEmpty().isInt().toInt(),
 	
@@ -47,9 +47,10 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		try {
 			await db.insert('submit', {
 				uuid: NEW_SUBMISSION_UUID,
-				user_class_id: req.api.params.user_class_id,
+				student_id: req.api.params.user_class_id,
 				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-				exercise_id: req.api.params.exercise_id,
+				// exercise_id: req.api.params.exercise_id,
+				question_id: req.api.params.exam_cont_id,
 				description: req.api.params.description || null
 			})
 

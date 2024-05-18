@@ -32,8 +32,9 @@ bindApiWithRoute(API_CLASS.CLASS__CREATE, api => apiRoute(router, api,
 		const newClassId = (await db.insert('class', {
 			course_id: req.api.params.course_id,
 			name: req.api.params.class_name,
-			startDate: req.api.params.startDate || null,
-			endDate: req.api.params.endDate || null 
+			start_date: req.api.params.start_date || null,
+			end_date: req.api.params.end_date || null,
+			teacher_id: userInfo.id 
 		}))?.insertId;
 
 		if (!newClassId)
@@ -95,7 +96,7 @@ bindApiWithRoute(API_CLASS.CLASS__GET, api => apiRoute(router, api,
 		const queryResult = await db.query("SELECT * FROM class WHERE id = ?", [req.api.params.class_id])
 		const classData = queryResult[0]
 
-		const r= await db.query("SELECT * FROM user_class WHERE user_id = ? AND class_id = ? ",[userInfo.id, req.api.params.class_id ])
+		const r= await db.query("SELECT * FROM student WHERE user_id = ? AND class_id = ? ",[userInfo.id, req.api.params.class_id ])
 		const result = r[0]['user_id'];
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
@@ -114,7 +115,7 @@ bindApiWithRoute(API_CLASS.CLASS__LIST, api => apiRoute(router,api,
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
-		const r= await db.query("SELECT * FROM user_class WHERE user_id = ?",[userInfo.id ])
+		const r= await db.query("SELECT * FROM student WHERE user_id = ?",[userInfo.id ])
 		const result = r[0]['user_id'];
 		const classesArray = r;
 
@@ -142,9 +143,9 @@ bindApiWithRoute(API_CLASS.CLASS__ADD__USER, api => apiRoute(router, api,
 
 		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('INSERT INTO user_class(user_id,class_id) VALUES(?,?)', [req.api.params.user_id, req.api.params.class_id]);
+		else await db.query('INSERT INTO student(user_id,class_id) VALUES(?,?)', [req.api.params.user_id, req.api.params.class_id]);
 
-		req.ctx.logActivity('Them vao lớp học', { user_class_id: req.api.params.class_id });
+		req.ctx.logActivity('Them vao lớp học', { student_id: req.api.params.class_id });
 		req.api.sendSuccess();
 	}
 ))
@@ -163,10 +164,40 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api,
 
 		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('DETELE FROM user_class(user_id,class_id) VALUES(?,?)', [req.api.params.user_id, req.api.params.class_id]);
+		else await db.query('DETELE FROM student(user_id,class_id) VALUES(?,?)', [req.api.params.user_id, req.api.params.class_id]);
 
-		req.ctx.logActivity('xoa trong lớp học', { user_class_id: req.api.params.class_id });
+		req.ctx.logActivity('xoa trong lớp học', { student_id: req.api.params.class_id });
 		req.api.sendSuccess();
 	}
 ))
 
+bindApiWithRoute(API_CLASS.CLASS__LIST__USER, api => apiRoute(
+	router,
+	api,
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+	async (req: ApiRequest, res: Response) => {
+		const classId = req.api.params.class_id
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+
+		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+
+		const checkTeacherQuery = await db.query('SELECT teacher_id FROM class WHERE id = ?', [classId])
+		const requiredTeacherId = checkTeacherQuery[0]['teacher_id']
+		
+		if (requiredTeacherId !== userInfo.id || !HIGHER_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+
+		const students = await db.query(`select
+			u.id user_id,
+			u.username ,
+			u.fullname ,
+			u.enabled ,
+			u.creation_time ,
+			u.last_login_time ,
+			u.last_update_time 
+		from student s join \`user\` u on u.id = s.user_id where s.class_id = ?`, [classId])
+
+		req.api.sendSuccess({ students: students })
+	}
+))

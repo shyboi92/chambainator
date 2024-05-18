@@ -120,6 +120,7 @@ import routeApiUser from '../routes/api-user.js';
 import routeApiCourse from '../routes/api-course.js';
 import routeApiClass from '../routes/api-class.js';
 import routeApiExercise from '../routes/api-exercise.js';
+import routeApiExam from '../routes/api-exam.js';
 import routeApiSubmit from '../routes/api-submit.js';
 
 
@@ -128,6 +129,7 @@ app.use(process.env.WEB_LOCAL_PATH as string, routeApiUser);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiCourse);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiClass);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiExercise);
+app.use(process.env.WEB_LOCAL_PATH as string, routeApiExam);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiSubmit);
 
 

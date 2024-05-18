@@ -182,6 +182,11 @@ export const API_CLASS= {
 		method: 'post',
 		roles: HIGHER_ROLES
 	},
+	CLASS__LIST__USER: {
+		url: '/api/class/list_user',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
 }
 
 export const API_EXERCISE= {
@@ -207,6 +212,34 @@ export const API_EXERCISE= {
 	},
 	EXERCISE__GET: {
 		url: '/api/exercise/get',
+		method: 'get',
+		roles: AUTHENTICATED_ROLES
+	},
+}
+
+export const API_EXAM= {
+	EXAM__CREATE: {
+		url: '/api/exam/create',
+		method: 'post',
+		roles: HIGHER_ROLES
+	},
+	EXAM__DELETE: {
+		url: '/api/exam/delete',
+		method: 'delete',
+		roles: HIGHER_ROLES
+	},
+	EXAM__LIST: {
+		url: '/api/exam/list',
+		method: 'get',
+		roles: AUTHENTICATED_ROLES
+	},
+	EXAM__UPDATE_INFO: {
+		url: '/api/exam/update_info',
+		method: 'post',
+		roles: HIGHER_ROLES
+	},
+	EXAM__GET: {
+		url: '/api/exam/get',
 		method: 'get',
 		roles: AUTHENTICATED_ROLES
 	},

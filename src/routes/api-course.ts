@@ -13,7 +13,8 @@ export default router;
 bindApiWithRoute(API_COURSE.COURSE__CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'course_name').trim().notEmpty(),
 	apiValidatorParam(api, 'description').trim().optional(),
-	
+	apiValidatorParam(api, 'code').trim().notEmpty(),
+
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
@@ -29,6 +30,7 @@ bindApiWithRoute(API_COURSE.COURSE__CREATE, api => apiRoute(router, api,
 			user_id: userInfo.id,
 			course_name: req.api.params.course_name,
 			description: req.api.params.description || null,
+			code: req.api.params.code
 		}))?.insertId;
 		if (!newCourseId) return req.api.sendError(ErrorCodes.INTERNAL_ERROR);
 
