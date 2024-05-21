@@ -1,5 +1,5 @@
 import {Router, Request, Response} from 'express';
-
+import cors from 'cors';
 import * as config from '../inc/config.js';
 import {ErrorCodes, Roles, AUTHENTICATED_ROLES, API, UserInfo, NotificationInfo} from '../inc/constants.js';
 import db from '../inc/database.js';
@@ -9,8 +9,10 @@ import {apiRoute, bindApiWithRoute, apiValidatorParam, ApiRequest} from '../inc/
 
 const router = Router();
 export default router;
-
-
+router.use(cors({
+	origin: '*',
+	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  }));
 /**
  * If no username is given, this API will check if the session user information is available and return it. This
  * helps the React app to reload the user information in case the user refreshes the page.

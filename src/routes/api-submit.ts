@@ -45,7 +45,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		const NEW_SUBMISSION_UUID = randomUUID()
 
 		try {
-			await db.insert('submit', {
+			await db.insert('submission', {
 				uuid: NEW_SUBMISSION_UUID,
 				student_id: req.api.params.user_class_id,
 				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),

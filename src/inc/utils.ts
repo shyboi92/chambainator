@@ -68,15 +68,20 @@ function getDataFilePath(relPath: string, type: DataFileTypes = DataFileTypes.UN
 /**
  * Checks and creates all the sub-directories along the given path if they don't exist
  */
-function prepareFolder(path: string) {
-    let p = '';
-    path.split(/[\/\\]/).forEach((e, i) => {
-        p += (i > 0 ? '/' : '') + e;
-        if (!fs.existsSync(p)) fs.mkdirSync(p);
-    })
+// function prepareFolder(path: string) {
+//     let p = '';
+//     path.split(/[\/\\]/).forEach((e, i) => {
+//         p += (i > 0 ? '/' : '') + e;
+//         if (!fs.existsSync(p)) fs.mkdirSync(p);
+//     })
+// }
+
+function prepareFolder(folderPath : string) {
+    console.log(`Preparing to create folder at path: ${folderPath}`);
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+    }
 }
-
-
 /**
  * Recursively scan a directory for files and sub-directories.
  */

@@ -1,7 +1,7 @@
 import {Router, Request, Response} from 'express';
 
 import * as config from '../inc/config.js';
-import {ErrorCodes, Roles, AUTHENTICATED_ROLES, API, API_COURSE, UserInfo, CourseInfo, NotificationInfo} from '../inc/constants.js';
+import {ErrorCodes, Roles, AUTHENTICATED_ROLES, API, API_COURSE, UserInfo, CourseInfo, NotificationInfo, HIGHER_ROLES} from '../inc/constants.js';
 import db from '../inc/database.js';
 import * as session from '../inc/session.js';
 
@@ -67,24 +67,19 @@ bindApiWithRoute(API_COURSE.COURSE__DELETE, api => apiRoute(
 
 bindApiWithRoute(API_COURSE.COURSE__UPDATE_INFO, api => apiRoute(router, api,
 	apiValidatorParam(api, 'course_id').trim().notEmpty(),
-	apiValidatorParam(api, 'course_name').trim().notEmpty(),
-	apiValidatorParam(api, 'description').trim().notEmpty(),
+	apiValidatorParam(api, 'course_name').trim().optional(),
+	apiValidatorParam(api, 'description').trim().optional(),
+	apiValidatorParam(api, 'code').trim().optional(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-
-		const queryResult = await db.query("SELECT user_id FROM course WHERE id = ?", [req.api.params.course_id])
-		const creatorId = queryResult[0]['user_id']
 		
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-
-		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
-
-		if (!(!notAdmin || (userInfo.id == creatorId)))
+		if (!HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-		await db.query('UPDATE course SET course_name = ?, description = ? WHERE id = ?', [req.api.params.course_name, req.api.params.description, req.api.params.course_id]);
+		await db.query('UPDATE course SET course_name = ?, description = ?, code = ? WHERE id = ?', [req.api.params.course_name, req.api.params.description, req.api.params.code, req.api.params.course_id]);
 		req.api.sendSuccess();
 	}
 ))

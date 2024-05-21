@@ -61,7 +61,7 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 	TEST_CASES.forEach(c => {
 		const TEST_CASE_ID = c.id
 		let execCmd = `wsl -e ${EXE_PATH}`
-		let timeout = c.run_time
+		let timeout = c.time_out
 		let testInput = c.input
 		let desiredOutput = c.output
 
@@ -102,7 +102,7 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 	const SCORE = MAX_SCORE / TEST_CASES.length * Object.values(TEST_RESULT).filter(Boolean).length
 
 	// Cập nhật kết quả chạy trong CSDL
-	await db.query("UPDATE submit SET score = ? WHERE uuid = ?", [SCORE, uuid])
+	await db.query("UPDATE submission SET score = ? WHERE uuid = ?", [SCORE, uuid])
 	console.info(`Đã cập nhật điểm của bài làm ${uuid}, bài đạt ${SCORE}/${MAX_SCORE} điểm`)
 	//#endregion
 }

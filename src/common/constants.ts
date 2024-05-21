@@ -215,7 +215,33 @@ export const API_EXERCISE= {
 		method: 'get',
 		roles: AUTHENTICATED_ROLES
 	},
+	TEST_CASE__CREATE: {
+		url: '/api/test_case/create',
+		method: 'post',
+		roles: HIGHER_ROLES
+	},
+	TEST_CASE__DELETE: {
+		url: '/api/test_case/delete',
+		method: 'delete',
+		roles: HIGHER_ROLES
+	},
+	TEST_CASE__LIST: {
+		url: '/api/test_case/list',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
+	TEST_CASE__UPDATE_INFO: {
+		url: '/api/test_case/update_info',
+		method: 'post',
+		roles: HIGHER_ROLES
+	},
+	TEST_CASE__GET: {
+		url: '/apitest_case/get',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
 }
+
 
 export const API_EXAM= {
 	EXAM__CREATE: {

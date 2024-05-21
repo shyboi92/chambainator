@@ -8,6 +8,7 @@ import cron from 'node-cron';
 import utils from './inc/utils.js';
 import backup from './inc/backup.js';
 import * as config from './inc/config.js';
+import cors from 'cors';
 
 import {initWebServer} from './inc/server-web.js';
 import {initWSServer} from './inc/server-ws.js';
