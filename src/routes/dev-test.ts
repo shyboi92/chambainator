@@ -1,7 +1,7 @@
 // The routes in this file are intended for testing in the development process, and are only mounted in development mode.
 
 import {Router, Request, Response} from 'express';
-
+import cors from 'cors';
 import {WebSocketMessages} from '../inc/constants.js';
 import {ParsedRequest} from '../inc/session.js';
 import db from '../inc/database.js';
@@ -9,7 +9,10 @@ import {notifyWSUserClients} from '../inc/server-ws.js';
 
 const router = Router();
 export default router;
-
+router.use(cors({
+	origin: '*',
+	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  }));
 
 router.all('/test/login', async (req: Request, res: Response) => {
 	const preq = req as ParsedRequest;
