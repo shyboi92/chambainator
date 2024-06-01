@@ -24,8 +24,9 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 
 	async (req: ApiRequest, res: Response) => {
 
+		let jwtToken
 		if (req.api.params.username) {
-			const jwtToken = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
+			 jwtToken = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
 			if (jwtToken === null)
 				return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
 		}
@@ -36,6 +37,7 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 		req.ctx.logActivity('Đăng nhập bằng tài khoản', {user_id: userInfo.id});
 
 		req.api.sendSuccess({
+			jwt: jwtToken,
 			user_info: userInfo
 		});
 	}

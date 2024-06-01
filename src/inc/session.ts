@@ -5,6 +5,7 @@ import {Request, Response, NextFunction, CookieOptions} from 'express';
 import * as config from './config.js';
 import db from './database.js';
 import { WebApi, Roles, CourseInfo, UserInfo } from './constants.js';
+import { token } from 'morgan';
 
 
 
@@ -78,7 +79,7 @@ export class RequestContext {
 
 		db.query('update user set last_login_time = current_timestamp where id = ?', [info.id]);
 
-		if (rememberLogin) {	// generates JWT token and saves it in a cookie
+		//if (rememberLogin) {	// generates JWT token and saves it in a cookie
 			const payload = {
 				userId: info.id
 			};
@@ -92,9 +93,9 @@ export class RequestContext {
 				...getCookieOptions(),
 				maxAge: maxAgeSeconds * 1000,
 			});
-		}
-
-		return info.id;
+		//}
+		return token;
+		//return info.id;
 	}
 
 
