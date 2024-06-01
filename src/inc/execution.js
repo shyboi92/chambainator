@@ -1,33 +1,29 @@
 import { execSync } from 'child_process';
 import db from '../inc/database.js';
 
-/**
- * Đổi đường dẫn Windows sang WSL
- * @param {String} windowsPath Đường dẫn trên Windows
- * @returns Đường dẫn trên Linux (WSL)
- */
-function convertWindowsPathToWslPath(windowsPath) {
-	// Regular expression to match Windows drive letters followed by a colon
-	const driveLetterRegex = /([A-Z]):/g;
 
-	// Replace all occurrences of Windows drive letters with their WSL paths
-	const wslPath = windowsPath.replace(driveLetterRegex, (match, driveLetter) => {
-		// Convert the drive letter to lowercase and prepend "/mnt/"
-		return `/mnt/${driveLetter.toLowerCase()}`;
-	});
+// function convertWindowsPathToWslPath(windowsPath) {
+// 	// Regular expression to match Windows drive letters followed by a colon
+// 	const driveLetterRegex = /([A-Z]):/g;
 
-	// Replace backslashes with forward slashes
-	return wslPath.replace(/\\/g, '/');
-}
+// 	const wslPath = windowsPath.replace(driveLetterRegex, (match, driveLetter) => {
+// 		// Convert the drive letter to lowercase and prepend "/mnt/"
+// 		return `/mnt/${driveLetter.toLowerCase()}`;
+// 	});
+
+// 	// Replace backslashes with forward slashes
+// 	return wslPath.replace(/\\/g, '/');
+// }
+
 
 const MS_PER_SEC = 1e3
 const NS_PER_SEC = 1e9
 
 export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
-	const EXE_PATH = process.env['EXE_PATH_WSL'] + '/' + uuid
-	let srcPathWsl = convertWindowsPathToWslPath(sourceFilePath)
+	const EXE_PATH = process.env['EXE_PATH'] + '/' + uuid
+	let srcPath = sourceFilePath
 
-	let compileCmd = `wsl -e gcc -o ${EXE_PATH} ${srcPathWsl}`
+	let compileCmd = `gcc -o ${EXE_PATH} ${srcPath}`
 
 	//#region Biên dịch chương trình
 	try {
@@ -60,7 +56,7 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 	//#region Chạy chương trình, với từng test case
 	TEST_CASES.forEach(c => {
 		const TEST_CASE_ID = c.id
-		let execCmd = `wsl -e ${EXE_PATH}`
+		let execCmd = `${EXE_PATH}`
 		let timeout = c.time_out
 		let testInput = c.input
 		let desiredOutput = c.output
