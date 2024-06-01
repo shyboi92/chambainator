@@ -23,9 +23,12 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 	apiValidatorParam(api, 'remember_login').optional().isBoolean().toBoolean(),
 
 	async (req: ApiRequest, res: Response) => {
+		let jwtToken
+
 		if (req.api.params.username) {
-			const userId = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
-			if (userId === null) return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
+			jwtToken = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
+			if (jwtToken === null)
+				return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
 		}
 		
 		const userInfo = await req.ctx.getUser()?.getClientInfo();
@@ -34,10 +37,7 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 		req.ctx.logActivity('Đăng nhập bằng tài khoản', {user_id: userInfo.id});
 
 		req.api.sendSuccess({
-			// Don't send the token to the client here, the client side does not need to get the token or to store it
-			// manually, as this is set into the cookie and sent back to the server automatically on every request.
-			// This is to avoid the token to be stolen.
-
+			jwt: jwtToken,
 			user_info: userInfo
 		});
 	}

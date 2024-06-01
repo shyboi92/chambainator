@@ -65,7 +65,7 @@ initWebServer(httpServer);
 initWSServer(httpServer);
 
 
-const port = process.env.WEB_LOCAL_PORT ?? 8080;
+const port = process.env.WEB_LOCAL_PORT ?? 5700;
 httpServer.listen(port);
 
 

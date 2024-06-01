@@ -103,7 +103,7 @@ bindApiWithRoute(API_COURSE.COURSE__GET, api => apiRoute(router, api,
 bindApiWithRoute(API_COURSE.COURSE__LIST, api => apiRoute(router,api,
 	
 	async (req: ApiRequest, res: Response) => {
-			const queryResult = await db.query("SELECT * FROM course WHERE user_id = ?", [req.ctx.getUserId()])
+			const queryResult = await db.query("SELECT * FROM course")
 			const coursesArray = queryResult
 
 			req.api.sendSuccess({ courses: coursesArray })

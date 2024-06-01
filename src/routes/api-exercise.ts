@@ -153,7 +153,6 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__LIST, api => apiRoute(router,api,
 			req.api.sendSuccess();
 		}
 	))
-
 bindApiWithRoute(API_EXERCISE.TEST_CASE__DELETE, api => apiRoute( router, api,
 	apiValidatorParam(api, 'test_case_id').notEmpty().isInt().toInt(),
 
