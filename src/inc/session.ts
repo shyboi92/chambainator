@@ -64,9 +64,7 @@ export class RequestContext {
 	 * Returns the user ID if successful, or `null` otherwise.
 	 * If `rememberLogin` is `true`, generates a token and stores it in a cookie.
 	 */
-
-
-	async loginWithUsernameAndPassword(username: string, password: string, rememberLogin: boolean): Promise<string | null> {
+	async loginWithUsernameAndPassword(username: string, password: string, rememberLogin: boolean): Promise<number | null> {
 		const info = await db.queryRow('select id, password, role from user where username = ? and enabled', [username]);
 		if (!info) return null;
 
@@ -80,23 +78,24 @@ export class RequestContext {
 
 		db.query('update user set last_login_time = current_timestamp where id = ?', [info.id]);
 
-		const payload = {
-			userId: info.id
-		};
+		if (rememberLogin) {	// generates JWT token and saves it in a cookie
+			const payload = {
+				userId: info.id
+			};
 
-		const maxAgeSeconds = config.REMEMBER_LOGIN_MAX_AGE_DAYS * 24 * 3600;
-		const token = jwt.sign(payload, config.SECRET_STRING, {
-			expiresIn: maxAgeSeconds
-		});
+			const maxAgeSeconds = config.REMEMBER_LOGIN_MAX_AGE_DAYS * 24 * 3600;
+			const token = jwt.sign(payload, config.SECRET_STRING, {
+				expiresIn: maxAgeSeconds
+			});
 
-		// this.res.cookie(config.REMEMBER_LOGIN_COOKIE_NAME, token, {
-		// 	...getCookieOptions(),
-		// 	maxAge: maxAgeSeconds * 1000,
-		// });
+			this.res.cookie(config.REMEMBER_LOGIN_COOKIE_NAME, token, {
+				...getCookieOptions(),
+				maxAge: maxAgeSeconds * 1000,
+			});
+		}
 
-		return token;
+		return info.id;
 	}
-	
 
 
 	/**
@@ -274,5 +273,53 @@ export class User {
 		return password.length >= 8
 			&& /[A-Z]/.test(password)
 			&& /[0-9]/.test(password);
+	}
+}
+
+
+
+class Course {
+	id: number | null = null;
+	info: CourseInfo | null = null;
+
+	constructor(id: number) {
+		this.id = id;
+	}
+
+	getId(): number | null {
+		return this.id;
+	}
+
+	async getInfo(): Promise<CourseInfo | null> {
+		if (!this.info) {
+			const r = await db.queryRow('select * from course where id = ?', [this.id]);
+			if (!r) this.info = null;
+			else {
+				this.info = {
+					id: r.id,
+					name: r.name,
+					description: r.description,
+					startDate: r.startDate,
+				};
+			}
+		}
+		return this.info;
+	}
+
+	async updateInfo(name: string, description: string, startDate: number) {
+		await db.query('update course set name = ?, description = ?, startDate = ? where id = ?', [name, description, startDate, this.id]);
+	}
+
+	async deleteCourse() {
+		await db.query('delete from course where id = ?', [this.id]);
+	}
+
+	static async createCourse(name: string, description: string, startDate: number): Promise<Course | null> {
+		const result = await db.query('insert into course (name, description, startDate) values (?, ?, ?)', [name, description, startDate]);
+		if (result.affectedRows === 1) {
+			const id = result.insertId;
+			return new Course(id);
+		}
+		return null;
 	}
 }
