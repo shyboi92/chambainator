@@ -1,5 +1,4 @@
 import {Router, Request, Response} from 'express';
-import cors from 'cors';
 import * as config from '../inc/config.js';
 import {ErrorCodes, Roles, AUTHENTICATED_ROLES, API, UserInfo, NotificationInfo} from '../inc/constants.js';
 import db from '../inc/database.js';
@@ -9,10 +8,8 @@ import {apiRoute, bindApiWithRoute, apiValidatorParam, ApiRequest} from '../inc/
 
 const router = Router();
 export default router;
-router.use(cors({
-	origin: '*',
-	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  }));
+
+
 /**
  * If no username is given, this API will check if the session user information is available and return it. This
  * helps the React app to reload the user information in case the user refreshes the page.
@@ -23,12 +20,9 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 	apiValidatorParam(api, 'remember_login').optional().isBoolean().toBoolean(),
 
 	async (req: ApiRequest, res: Response) => {
-
-		let jwtToken
 		if (req.api.params.username) {
-			 jwtToken = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
-			if (jwtToken === null)
-				return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
+			const userId = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
+			if (userId === null) return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
 		}
 		
 		const userInfo = await req.ctx.getUser()?.getClientInfo();
@@ -37,7 +31,10 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 		req.ctx.logActivity('Đăng nhập bằng tài khoản', {user_id: userInfo.id});
 
 		req.api.sendSuccess({
-			jwt: jwtToken,
+			// Don't send the token to the client here, the client side does not need to get the token or to store it
+			// manually, as this is set into the cookie and sent back to the server automatically on every request.
+			// This is to avoid the token to be stolen.
+
 			user_info: userInfo
 		});
 	}

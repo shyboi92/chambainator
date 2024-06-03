@@ -1,5 +1,4 @@
 import {Router} from 'express';
-import cors from 'cors';
 import {ErrorCodes, Roles, AUTHENTICATED_ROLES, UserInfo, API_SUBMISSION} from '../inc/constants.js';
 import db from '../inc/database.js';
 import { evaluateSubmission } from '../inc/execution.js';
@@ -11,10 +10,7 @@ import { randomUUID } from 'crypto';
 
 const router = Router();
 export default router;
-router.use(cors({
-	origin: '*',
-	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  }));
+
 
 bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	router, 
