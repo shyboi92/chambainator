@@ -18,7 +18,6 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'exercise_name').trim().notEmpty(),
 	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'course_id').notEmpty().isInt().toInt(),
-	apiValidatorParam(api, 'test_case').notEmpty().isArray().toArray(),
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
