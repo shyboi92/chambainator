@@ -114,7 +114,7 @@ export const API = {
 	},
 	USER__DELETE: {
 		url: '/api/user/delete',
-		method: 'delete',
+		method: 'post',
 		roles: [Roles.SYSTEM_ADMIN]
 	}
 }
@@ -126,7 +126,7 @@ export const API_COURSE= {
 	},
 	COURSE__DELETE: {
 		url: '/api/course/delete',
-		method: 'delete',
+		method: 'post',
 		roles: HIGHER_ROLES
 	},
 	COURSE__UPDATE_INFO: {
@@ -154,7 +154,7 @@ export const API_CLASS= {
 	},
 	CLASS__DELETE: {
 		url: '/api/class/delete',
-		method: 'delete',
+		method: 'post',
 		roles: HIGHER_ROLES
 	},
 	CLASS__UPDATE_INFO: {
@@ -197,7 +197,7 @@ export const API_EXERCISE= {
 	},
 	EXERCISE__DELETE: {
 		url: '/api/exercise/delete',
-		method: 'delete',
+		method: 'post',
 		roles: HIGHER_ROLES
 	},
 	EXERCISE__LIST: {
@@ -222,7 +222,7 @@ export const API_EXERCISE= {
 	},
 	TEST_CASE__DELETE: {
 		url: '/api/test_case/delete',
-		method: 'delete',
+		method: 'post',
 		roles: HIGHER_ROLES
 	},
 	TEST_CASE__LIST: {
@@ -251,7 +251,7 @@ export const API_EXAM= {
 	},
 	EXAM__DELETE: {
 		url: '/api/exam/delete',
-		method: 'delete',
+		method: 'post',
 		roles: HIGHER_ROLES
 	},
 	EXAM__LIST: {
@@ -287,8 +287,14 @@ export const API_SUBMISSION = {
 	SUBMISSION__GET: {
 		url: '/api/submission/get',
 		method: 'get',
-		roles: [Roles.SYSTEM_ADMIN]
+		roles: AUTHENTICATED_ROLES
 	},
+
+	SUBMISSION__GET_FILE: {
+		url: '/api/submission/get-file',
+		method: 'get',
+		roles: AUTHENTICATED_ROLES
+	}
 }
 
 export interface UserInfo {

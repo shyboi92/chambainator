@@ -67,8 +67,8 @@ bindApiWithRoute(API.USER__CREATE, api => apiRoute(router, api,
 		if (await db.queryValue('select id from user where username = ?', [req.api.params.username]) !== null)
 			return req.api.sendError(ErrorCodes.USERNAME_IN_USE);
 		
-		if (!session.User.checkStrongPassword(req.api.params.password))
-			return req.api.sendError(ErrorCodes.INVALID_PASSWORD);
+		// if (!session.User.checkStrongPassword(req.api.params.password))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PASSWORD);
 
 		if (!AUTHENTICATED_ROLES.includes(req.api.params.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
