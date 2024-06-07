@@ -39,14 +39,12 @@ bindApiWithRoute(API_COURSE.COURSE__CREATE, api => apiRoute(router, api,
 
 		req.ctx.logActivity('Tạo khoa hoc mới', {user_id: newCourseId});
 
-		req.api.sendSuccess({ user_id: newCourseId });
+		req.api.sendSuccess({ course_id: newCourseId });
 	}
 ))
 
-bindApiWithRoute(API_COURSE.COURSE__DELETE, api => apiRoute(
-	router,
-	api,
-	apiValidatorParam(api, 'course_id').trim().notEmpty(),
+bindApiWithRoute(API_COURSE.COURSE__DELETE, api => apiRoute(router, api,
+	apiValidatorParam(api, 'course_id').isInt().toInt().notEmpty(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;

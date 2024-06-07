@@ -172,7 +172,7 @@ bindApiWithRoute(API_EXERCISE.TEST_CASE__DELETE, api => apiRoute( router, api,
 ))
 
 bindApiWithRoute(API_EXERCISE.TEST_CASE__UPDATE_INFO, api => apiRoute(router, api,
-	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'test_case_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'input').trim().notEmpty(),
 	apiValidatorParam(api, 'output').trim().notEmpty(),
 	apiValidatorParam(api, 'time_out').isFloat().toFloat().notEmpty(),
@@ -187,39 +187,39 @@ bindApiWithRoute(API_EXERCISE.TEST_CASE__UPDATE_INFO, api => apiRoute(router, ap
 
 		if ( notTeacher)
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('UPDATE exercise SET name = ? description = ? where id = ?', [req.api.params.name, req.api.params.description,req.api.params.exercise_id]);
+		else await db.query('UPDATE test_case SET input = ? output = ? time_out = ? where id = ?', [req.api.params.input, req.api.params.output,req.api.params.time_out, req.api.params.test_case_id]);
 
-		req.ctx.logActivity('Sửa thông tin bai tap', { exercise_id: req.api.params.exercise_id });
+		req.ctx.logActivity('Sửa thông tin tập test', {test_case_id: req.api.params.test_case_id });
 		req.api.sendSuccess();
 	}
 ))
 
 
-bindApiWithRoute(API_EXERCISE.EXERCISE__GET, api => apiRoute(router, api,
-	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
+bindApiWithRoute(API_EXERCISE.TEST_CASE__GET, api => apiRoute(router, api,
+	apiValidatorParam(api, 'test_case_id').notEmpty().isInt().toInt(),
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT * FROM exercise WHERE id = ?", [req.api.params.exercise_id])
-		const exerciseData = queryResult[0]
+		const queryResult = await db.query("SELECT * FROM test_case WHERE id = ?", [req.api.params.test_case_id])
+		const testcaseData = queryResult[0]
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		req.api.sendSuccess(exerciseData)
+		req.api.sendSuccess(testcaseData)
 	}
 ))
 
 
-bindApiWithRoute(API_EXERCISE.EXERCISE__LIST, api => apiRoute(router,api,
-	apiValidatorParam(api, 'course_id').notEmpty().isInt().toInt(),
+bindApiWithRoute(API_EXERCISE.TEST_CASE__LIST, api => apiRoute(router,api,
+	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT * FROM exercise WHERE course_id = ?", [req.api.params.course_id])
+		const queryResult = await db.query("SELECT * FROM test_case WHERE exercise_id = ?", [req.api.params.exercise_id])
 		const exerciseArray = queryResult
 
-		req.api.sendSuccess({ exercises: exerciseArray })
+		req.api.sendSuccess({ testcase: exerciseArray })
 	}
 ))
 	//#endregion

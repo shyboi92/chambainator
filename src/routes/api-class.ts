@@ -22,15 +22,13 @@ bindApiWithRoute(API_CLASS.CLASS__CREATE, api => apiRoute(router, api,
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT user_id FROM course WHERE id = ?", [req.api.params.course_id])
-		const creatorId = queryResult[0]['user_id']
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
 		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
 
-		if (!(!notAdmin || (userInfo.id == creatorId)))
+		if (!HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		
 		const newClassId = (await db.insert('class', {
@@ -54,13 +52,13 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute( router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r= await db.query("SELECT course.user_id FROM class INNER JOIN course ON class.course_id = course.id WHERE class.id = ?",[req.api.params.class_id])
-		const result = r[0]['user_id'];
+		const r= await db.query("SELECT teacher_id FROM class WHERE class.id = ?",[req.api.params.class_id])
+		const result = r[0]['teacher_id'];
 		
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
+		if (result!== userInfo.id || !HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		else await db.query("DELETE FROM class WHERE id = ?", [req.api.params.class_id]);
 		
@@ -76,13 +74,13 @@ bindApiWithRoute(API_CLASS.CLASS__UPDATE_INFO, api => apiRoute(router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r= await db.query("SELECT course.user_id FROM class INNER JOIN course ON class.course_id = course.id WHERE class.id = ?",[req.api.params.class_id])
-		const result = r[0]['user_id'];
+		const r= await db.query("SELECT teacher_id FROM class WHERE class.id = ?",[req.api.params.class_id])
+		const result = r[0]['teacher_id'];
 		
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (result!== userInfo.role || !HIGHER_ROLES.includes(userInfo.role))
+		if (result!== userInfo.id || !HIGHER_ROLES.includes(userInfo.role))
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		else await db.query('UPDATE class SET name = ? startDate = ? endDate = ? where id = ?', [req.api.params.name, req.api.params.start_date,req.api.params.end_date,req.api.params.class_id]);
 
@@ -115,19 +113,21 @@ bindApiWithRoute(API_CLASS.CLASS__GET, api => apiRoute(router, api,
 
 
 bindApiWithRoute(API_CLASS.CLASS__LIST, api => apiRoute(router,api,
+	apiValidatorParam(api, 'course_id').isInt().toInt().optional(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-
-		const r= await db.query("SELECT * FROM student WHERE user_id = ?",[userInfo.id ])
-		const result = r[0]['user_id'];
+		let r;
+		if (userInfo.role == Roles.SYSTEM_ADMIN) 
+		 r= await db.query("SELECT * FROM class WHERE course_id = ?",[req.api.params.course_id])
+		else if (userInfo.role == Roles.TEACHER)
+		 r= await db.query("SELECT * FROM class WHERE teacher_id = ?",[userInfo.id ])
+		else if (userInfo.role == Roles.STUDENT)
+		 r= await db.query("SELECT class.name,class.start_date ,class.end_date  FROM student INNER JOIN class ON student.class_id = class.id WHERE student.user_id = ",[userInfo.id])
 		const classesArray = r;
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-
-		if (result!== userInfo.id || !HIGHER_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		req.api.sendSuccess({ classes: classesArray })
 	}
