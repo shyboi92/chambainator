@@ -5,6 +5,7 @@ import {Request, Response, NextFunction, CookieOptions} from 'express';
 import * as config from './config.js';
 import db from './database.js';
 import { WebApi, Roles, CourseInfo, UserInfo } from './constants.js';
+import { token } from 'morgan';
 
 
 
@@ -277,49 +278,3 @@ export class User {
 }
 
 
-
-class Course {
-	id: number | null = null;
-	info: CourseInfo | null = null;
-
-	constructor(id: number) {
-		this.id = id;
-	}
-
-	getId(): number | null {
-		return this.id;
-	}
-
-	async getInfo(): Promise<CourseInfo | null> {
-		if (!this.info) {
-			const r = await db.queryRow('select * from course where id = ?', [this.id]);
-			if (!r) this.info = null;
-			else {
-				this.info = {
-					id: r.id,
-					name: r.name,
-					description: r.description,
-					startDate: r.startDate,
-				};
-			}
-		}
-		return this.info;
-	}
-
-	async updateInfo(name: string, description: string, startDate: number) {
-		await db.query('update course set name = ?, description = ?, startDate = ? where id = ?', [name, description, startDate, this.id]);
-	}
-
-	async deleteCourse() {
-		await db.query('delete from course where id = ?', [this.id]);
-	}
-
-	static async createCourse(name: string, description: string, startDate: number): Promise<Course | null> {
-		const result = await db.query('insert into course (name, description, startDate) values (?, ?, ?)', [name, description, startDate]);
-		if (result.affectedRows === 1) {
-			const id = result.insertId;
-			return new Course(id);
-		}
-		return null;
-	}
-}

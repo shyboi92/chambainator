@@ -1,11 +1,13 @@
 import { Connection, createConnection } from 'mysql2';
 import moment from 'moment';
 
+
+
 let conn: Connection | null = null;
 let connectionPromise: Promise<void> | null = null;
 
 
-const MYSQL_ERRNO__PROTOCOL_CONNECTION_LOST = 4031;
+const MYSQL_ERRCODES__PROTOCOL_CONNECTION_LOST = ['PROTOCOL_CONNECTION_LOST', 4031];
 
 
 function connect() {
@@ -18,11 +20,11 @@ function connect() {
 		user: process.env.DB_USERNAME,
 		password: process.env.DB_PASSWORD,
 		database: process.env.DB_SCHEMA,
-		insecureAuth : true
+		insecureAuth: true
 	});
 
 	__conn.on('error', err => {
-		if ('code' in err && err.code == MYSQL_ERRNO__PROTOCOL_CONNECTION_LOST) {
+		if ('code' in err && MYSQL_ERRCODES__PROTOCOL_CONNECTION_LOST.includes(err.code as string | number)) {
 			// set to null to reconnect in the next query
 			console.error('Database connection lost');
 			conn = null;
@@ -66,7 +68,7 @@ function query(sql: string, args?: any[]) {
 			resolve(rows);
 		});
 	}).catch(err => {
-		if (process.env.NODE_ENV == 'development') console.error(err);
+		console.error(err);
 	});
 }
 
@@ -89,14 +91,21 @@ async function queryColumn(sql: string, args?: any[]) {
 
 async function insert(tableName: string, params: object | object[]) {
 	if (!Array.isArray(params)) {
-		const keys = Object.keys(params);
+		const keys = Object.keys(params).map(e => '`' + e + '`');
 		return query(`insert into ${tableName}(${keys.join(',')}) values(${keys.map(e => '?').join(',')})`, Object.values(params));
 	}
 
-	const keys = Object.keys(params[0]);
+	const keys = Object.keys(params[0]).map(e => '`' + e + '`');
 	const placeholders = `(${keys.map(e => '?').join(',')})`;
 	return query(`insert into ${tableName}(${keys.join(',')}) values ${params.map(e => placeholders).join(',')}`,
 		params.flatMap(e => Object.values(e)));
+}
+
+async function updateRow(tableName: string, id: number, params: object) {
+	const keys = Object.keys(params);
+	const placeholders = keys.map(e => `\`${e}\` = ?`).join(',');
+	return query(`update ${tableName} set ${placeholders} where id = ?`,
+		[...Object.values(params), id]);
 }
 
 
@@ -129,5 +138,6 @@ export default {
 	queryRow,
 	queryColumn,
 	insert,
+	updateRow,
 	transaction
 };
