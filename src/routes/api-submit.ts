@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {ErrorCodes, Roles, AUTHENTICATED_ROLES, UserInfo, API_SUBMISSION} from '../inc/constants.js';
+import {ErrorCodes, Roles, AUTHENTICATED_ROLES, UserInfo, API_SUBMISSION, HIGHER_ROLES} from '../inc/constants.js';
 import db from '../inc/database.js';
 import { evaluateSubmission } from '../inc/execution.js';
 
@@ -167,16 +167,26 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
 
 	async (req: ApiRequest) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r= await db.query("SELECT  FROM submission INNER JOIN course ON exercise.course_id = course.id WHERE exercise.id = ?",[req.api.params.class_id])
-		const result = r[0]['user_id'];
+		let result;
+		let Creator ;
+
+		if (userInfo.role == Roles.STUDENT) {
+		Creator = await db.query("SELECT id FROM student WHERE user_id = ?",[userInfo.id])
+		const result1 = Creator[0]['id'];
+
+		const r= await db.query("SELECT * FROM submission WHERE student_id = ? question_id = ?",[result1, req.api.params.question_id])
+		result = r;}
+		else {
+			const y= await db.query("SELECT * FROM submission WHERE question_id = ?", [req.api.params.question_id]);
+			result = y;
+		}
 		
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (result!== userInfo.role || ![Roles.SYSTEM_ADMIN].includes(userInfo.role))
+		if (Creator = null || !HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query("DELETE FROM exercise WHERE id = ?", [req.api.params.exercise_id]);
 		
-		req.api.sendSuccess();
+		req.api.sendSuccess(result);
 	}
 ))

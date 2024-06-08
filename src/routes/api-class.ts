@@ -92,20 +92,19 @@ bindApiWithRoute(API_CLASS.CLASS__GET, api => apiRoute(router, api,
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		
-		const queryResult = await db.query("SELECT * FROM class WHERE id = ?", [req.api.params.class_id])
-		const classData = queryResult[0]
+		let queryResult ;
 
-		const r= await db.query("SELECT teacher_id FROM class WHERE id = ? ",[req.api.params.class_id ])
-		const result = r[0]['teacher_id'];
+		if (userInfo.role == Roles.SYSTEM_ADMIN){
+			queryResult = await db.query("SELECT * FROM class WHERE id = ?", [req.api.params.class_id])
+		} else if (userInfo.role == Roles.TEACHER) {
+			queryResult = await db.query("SELECT * FROM class WHERE id = ? teacher_id = ?", [req.api.params.class_id, userInfo.id])
+		} else if (userInfo.role == Roles.STUDENT) {
+			queryResult = await db.query("SELECT * FROM student INNER JOIN class ON student.class_id=class.id WHERE student.user_id = ? AND student.class_id = ?",[userInfo.id, req.api.params.class_id ])
+		}	
 
-		const t= await db.query("SELECT * FROM student WHERE user_id = ? class_id = ?",[userInfo.id, req.api.params.class_id ])
-		//const resultt = t[0]['user_id'];
-
+		let classData = queryResult[0];
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-
-		if (result!== userInfo.id || !Roles.SYSTEM_ADMIN || t ==  null)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		req.api.sendSuccess(classData)
 	}
