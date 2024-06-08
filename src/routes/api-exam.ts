@@ -24,7 +24,7 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 
 		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
 
-		if (!(!notAdmin || (userInfo.id == creatorId)))
+		if (notAdmin && (userInfo.id != creatorId))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const newExamId = (await db.insert('exam', {
