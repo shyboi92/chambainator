@@ -23,7 +23,7 @@ bindApiWithRoute(API_COURSE.COURSE__CREATE, api => apiRoute(router, api,
 
 		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
 		const isNormalUser = Roles.STUDENT == userInfo.role
-		if (notAdmin || isNormalUser)
+		if (!HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const newCourseId = (await db.insert('course', {

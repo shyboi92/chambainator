@@ -187,6 +187,11 @@ export const API_CLASS= {
 		method: 'get',
 		roles: HIGHER_ROLES
 	},
+	STUDENT__LIST: {
+		url: '/api/student_list',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
 }
 
 export const API_EXERCISE= {

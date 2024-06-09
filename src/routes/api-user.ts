@@ -1,6 +1,6 @@
 import {Router, Request, Response} from 'express';
 import * as config from '../inc/config.js';
-import {ErrorCodes, Roles, AUTHENTICATED_ROLES, API, UserInfo, NotificationInfo} from '../inc/constants.js';
+import {ErrorCodes, Roles, AUTHENTICATED_ROLES, API, UserInfo, NotificationInfo, HIGHER_ROLES} from '../inc/constants.js';
 import db from '../inc/database.js';
 import * as session from '../inc/session.js';
 
@@ -262,9 +262,6 @@ bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
 		});
 	}
 ))
-
-
-
 
 
 bindApiWithRoute(API.USER__NOTIFICATION__UNREAD_COUNT, api => apiRoute(router,api,

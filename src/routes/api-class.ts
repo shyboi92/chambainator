@@ -172,8 +172,7 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api,
 	}
 ))
 
-bindApiWithRoute(API_CLASS.CLASS__LIST__USER, api => apiRoute( router,
-	api,
+bindApiWithRoute(API_CLASS.CLASS__LIST__USER, api => apiRoute( router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
@@ -189,6 +188,7 @@ bindApiWithRoute(API_CLASS.CLASS__LIST__USER, api => apiRoute( router,
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const students = await db.query(`select
+			s.id,
 			u.id user_id,
 			u.username ,
 			u.fullname ,
@@ -197,6 +197,29 @@ bindApiWithRoute(API_CLASS.CLASS__LIST__USER, api => apiRoute( router,
 			u.last_login_time ,
 			u.last_update_time 
 		from student s join \`user\` u on u.id = s.user_id where s.class_id = ?`, [req.api.params.class_id])
+
+		req.api.sendSuccess({ students: students })
+	}
+))
+
+
+bindApiWithRoute(API_CLASS.STUDENT__LIST, api => apiRoute(router, api,
+
+	async (req: ApiRequest, res: Response) => {
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+	
+		if ( !HIGHER_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+
+		const students = await db.query(`select 
+			id user_id,
+			username ,
+			fullname ,
+			enabled ,
+			creation_time ,
+			last_login_time ,
+			last_update_time 
+		from user where role = 3`)
 
 		req.api.sendSuccess({ students: students })
 	}
