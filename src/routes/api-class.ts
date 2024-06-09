@@ -165,7 +165,7 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api,
 
 		if (result!== userInfo.id && userInfo.role !== Roles.SYSTEM_ADMIN)
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('DETELE FROM student(user_id,class_id) WHERE id = ?', [req.api.params.student_id]);
+		else await db.query('DELETE FROM student WHERE id = ?', [req.api.params.student_id]);
 
 		req.ctx.logActivity('xoa trong lớp học', { student_id: req.api.params.student_id });
 		req.api.sendSuccess();
