@@ -37,8 +37,8 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__CREATE, api => apiRoute(router, api,
 		 	return req.api.sendError(ErrorCodes.INTERNAL_ERROR);
 
 		
-		req.ctx.logActivity('Tạo bai hoc mới', { class_id: newExerciseId });
-		req.api.sendSuccess({ class_id: newExerciseId });
+		req.ctx.logActivity('Tạo bai hoc mới', { exercise: newExerciseId });
+		req.api.sendSuccess({ exercise_id: newExerciseId });
 	}
 ))
 
@@ -126,7 +126,7 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__LIST, api => apiRoute(router,api,
 			const exerciseId = req.api.params.exercise_id
 			let args = []
 			
-			let sql2 = "INSERT INTO test_case (exercise_id, input, output, time_out) VALUES";
+			let sql2 = "INSERT INTO test_case (exercise_id, input, output, run_time) VALUES";
 			let test_cases
 
 			try {
@@ -138,7 +138,7 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__LIST, api => apiRoute(router,api,
 
 			test_cases.forEach((c: any) => {
 				const values = ` (?, ?, ?, ?),`
-				args = args.concat(exerciseId, c.input, c.output, c.timeout)
+				args = args.concat(exerciseId, c.input, c.output, c.run_time)
 				sql2 += values
 			});
 
