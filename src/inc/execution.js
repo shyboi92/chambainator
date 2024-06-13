@@ -38,7 +38,7 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 	//#endregion
 
 	//#region Lấy test case và các thông tin liên quan đến bài nộp
-	const TEST_CASES = await db.query("SELECT * FROM test_case WHERE exercise_id = (SELECT ec.exercise_id FROM submit s JOIN exam_cont ec ON ec.id = s.question_id WHERE uuid = ?)", [uuid])
+	const TEST_CASES = await db.query("SELECT * FROM test_case WHERE exercise_id = (SELECT ec.exercise_id FROM submission s JOIN exam_cont ec ON ec.id = s.question_id WHERE uuid = ?)", [uuid])
 	
 	/**
 	 * Object lưu kết quả chạy của từng test case.

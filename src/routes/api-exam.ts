@@ -12,6 +12,8 @@ export default router;
 
 bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'name').trim().optional(),
+	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'start_date').notEmpty().isDate().toDate(),
 	apiValidatorParam(api, 'end_date').notEmpty().isDate().toDate(),
     apiValidatorParam(api, 'questions').isArray().toArray(),
@@ -29,6 +31,8 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 
 		const newExamId = (await db.insert('exam', {
 			class_id: req.api.params.class_id,
+			name: req.api.params.name,
+			description: req.api.params.description,
 			start_date: req.api.params.start_date ,
 			end_date: req.api.params.end_date
 		}))?.insertId;
@@ -56,11 +60,12 @@ bindApiWithRoute(API_EXAM.EXAM__DELETE, api => apiRoute( router, api,
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		const r= await db.query("SELECT class.teacher_id FROM exam INNER JOIN class ON exam.class_id = class.id WHERE exam.id = ?",[req.api.params.exam_id])
 		const result = r[0]['teacher_id'];
-		
+		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN;
+
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (result!== userInfo.id || ![Roles.SYSTEM_ADMIN].includes(userInfo.role))
+		if (result!== userInfo.id && notAdmin)
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		else await db.query("DELETE FROM exam WHERE id = ?", [req.api.params.exam_id]);
 		
@@ -70,6 +75,8 @@ bindApiWithRoute(API_EXAM.EXAM__DELETE, api => apiRoute( router, api,
 
 bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'name').trim().optional(),
+	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'start_date').optional().isDate().toDate(),
 	apiValidatorParam(api, 'end_date').optional().isDate().toDate(),
 
@@ -77,13 +84,14 @@ bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		const r= await db.query("SELECT class.teacher_id FROM exam INNER JOIN class ON exam.class_id = class.id WHERE exam.id = ?",[req.api.params.exam_id])
 		const result = r[0]['teacher_id'];
-		
+		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN;
+
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (result!== userInfo.id || !HIGHER_ROLES.includes(userInfo.role))
+		if (result!== userInfo.id && notAdmin)
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('UPDATE exam SET  start_date = ? end_date = ? where id = ?', [req.api.params.start_date,req.api.params.end_date,,req.api.params.exam_id]);
+		else await db.query('UPDATE exam SET start_date = ? end_date = ? name = ? description = ? where id = ?', [req.api.params.start_date,req.api.params.end_date,req.api.params.name,req.api.params.description,req.api.params.exam_id]);
 
 		req.ctx.logActivity('Sửa thông tin bài kiểm tra', { exam_id: req.api.params.exam_id });
 		req.api.sendSuccess();
@@ -96,13 +104,13 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT * FROM exercise WHERE id = ?", [req.api.params.exercise_id])
-		const exerciseData = queryResult[0]
+		const queryResult = await db.query("SELECT * FROM exam WHERE id = ?", [req.api.params.exam_id])
+		const examData = queryResult[0]
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		req.api.sendSuccess(exerciseData)
+		req.api.sendSuccess(examData)
 	}
 ))
 
