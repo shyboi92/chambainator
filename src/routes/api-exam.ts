@@ -67,8 +67,10 @@ bindApiWithRoute(API_EXAM.EXAM__DELETE, api => apiRoute( router, api,
 
 		if (result!== userInfo.id && notAdmin)
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query("DELETE FROM exam WHERE id = ?", [req.api.params.exam_id]);
-		
+		else {
+			await db.query("DELETE FROM exam_cont WHERE exam_id = ?", [req.api.params.exam_id]);
+			await db.query("DELETE FROM exam WHERE id = ?", [req.api.params.exam_id]);
+		}
 		req.api.sendSuccess();
 	}
 ))
