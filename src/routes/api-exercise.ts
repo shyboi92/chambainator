@@ -172,7 +172,7 @@ bindApiWithRoute(API_EXERCISE.TEST_CASE__UPDATE_INFO, api => apiRoute(router, ap
 	apiValidatorParam(api, 'test_case_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'input').trim().notEmpty(),
 	apiValidatorParam(api, 'output').trim().notEmpty(),
-	apiValidatorParam(api, 'time_out').isFloat().toFloat().notEmpty(),
+	apiValidatorParam(api, 'run_time').isFloat().toFloat().notEmpty(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
@@ -184,7 +184,7 @@ bindApiWithRoute(API_EXERCISE.TEST_CASE__UPDATE_INFO, api => apiRoute(router, ap
 
 		if ( notTeacher)
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('UPDATE test_case SET input = ? output = ? time_out = ? where id = ?', [req.api.params.input, req.api.params.output,req.api.params.time_out, req.api.params.test_case_id]);
+		else await db.query('UPDATE test_case SET input = ? output = ? run_time = ? where id = ?', [req.api.params.input, req.api.params.output,req.api.params.run_time, req.api.params.test_case_id]);
 
 		req.ctx.logActivity('Sửa thông tin tập test', {test_case_id: req.api.params.test_case_id });
 		req.api.sendSuccess();

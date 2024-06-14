@@ -34,6 +34,7 @@ export enum ErrorCodes {
 	INTERNAL_ERROR,
 	INVALID_UPLOAD_FILE_TYPE,
 	PAGE_OUT_OF_RANGE,
+	NOT_FOUND
 
 	// other codes to come...
 }
