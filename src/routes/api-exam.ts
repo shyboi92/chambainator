@@ -107,7 +107,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		const queryResult = await db.query("SELECT exam.name, exam.description, exam.start_date, exam.end_date, exam_cont.id FROM exam_cont INNER JOIN exam ON exam_cont.exam_id=exam.id WHERE exam.id = ?", [req.api.params.exam_id])
-		const examData = queryResult[0]
+		const examData = queryResult
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
@@ -116,6 +116,20 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 	}
 ))
 
+bindApiWithRoute(API_EXAM.EXAM__QUESTIONS__LIST, api => apiRoute(router, api,
+	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
+	
+	async (req: ApiRequest, res: Response) => {
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+		const queryResult = await db.query("SELECT id FROM exam_cont WHERE exam_id = ?", [req.api.params.exam_id])
+		const examData = queryResult
+
+		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+
+		req.api.sendSuccess(examData)
+	}
+))
 
 bindApiWithRoute(API_EXAM.EXAM__LIST, api => apiRoute(router,api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),

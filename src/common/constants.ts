@@ -275,6 +275,11 @@ export const API_EXAM= {
 		method: 'get',
 		roles: AUTHENTICATED_ROLES
 	},
+	EXAM__QUESTIONS__LIST: {
+		url: '/api/exam/questions_list',
+		method: 'get',
+		roles: AUTHENTICATED_ROLES
+	},
 }
 
 export const API_SUBMISSION = {
