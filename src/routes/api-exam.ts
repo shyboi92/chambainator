@@ -123,8 +123,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		req.api.sendSuccess(queryResult)
-		req.api.sendSuccess(examData)
+		req.api.sendSuccess(examData + queryResult)
 	}
 ))
 
