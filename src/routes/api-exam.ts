@@ -113,19 +113,36 @@ bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 
 
 bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
-	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
-	
-	async (req: ApiRequest, res: Response) => {
-		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT name, description, start_date, end_date FROM exam WHERE id = ?", [req.api.params.exam_id])
-		const examData = await db.query("SELECT id FROM exam_cont WHERE exam_id = ?", [req.api.params.exam_id])
+    apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
+    async (req: ApiRequest, res: Response) => {
+        const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+        
+        // Get exam details
+        const queryResult = await db.query(
+            "SELECT name, description, start_date, end_date FROM exam WHERE id = ?", 
+            [req.api.params.exam_id]
+        );
 
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+        // Get exam content ids
+        const examData = await db.query(
+            "SELECT id FROM exam_cont WHERE exam_id = ?", 
+            [req.api.params.exam_id]
+        );
 
-		req.api.sendSuccess(examData + queryResult)
-	}
-))
+        if (!AUTHENTICATED_ROLES.includes(userInfo.role)) {
+            return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+        }
+
+        // Combine results into one object
+        const responseData = {
+            exam: queryResult[0],  // Assuming queryResult returns an array with one item
+            exam_cont_ids: examData.map((row: any) => row.id)
+        };
+
+        req.api.sendSuccess(responseData);
+    }
+));
+
 
 bindApiWithRoute(API_EXAM.EXAM__QUESTIONS__LIST, api => apiRoute(router, api,
 	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
