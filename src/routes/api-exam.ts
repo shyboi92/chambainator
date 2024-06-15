@@ -106,7 +106,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT * FROM exam WHERE id = ?", [req.api.params.exam_id])
+		const queryResult = await db.query("SELECT exam.name, exam.description, exam.start_date, exam.end_date, exam_cont.exercise_id FROM exam_cont INNER JOIN exam ON exam_cont.exam_id=exam.id WHERE exam.id = ?", [req.api.params.exam_id])
 		const examData = queryResult[0]
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
