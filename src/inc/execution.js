@@ -43,7 +43,7 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 	TEST_CASES.forEach(c => {
 		const TEST_CASE_ID = c.id
 		let execCmd = `/root/ptrace-v2 ${EXE_PATH}`
-		let timeout = c.time_out
+		let timeout = c.run_time
 		let testInput = c.input
 		let desiredOutput = c.output
 
