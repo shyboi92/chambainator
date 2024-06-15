@@ -67,6 +67,8 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 
 			if (e.code == 'ETIMEDOUT') {
 				console.info(`Bài làm ${uuid}, test case ${TEST_CASE_ID}: Chạy quá thời gian (tối đa ${timeout} giây)`)
+			} else {
+				console.error(`Bài làm ${uuid}, test case ${TEST_CASE_ID}: Lỗi lạ: `, e)
 			}
 		}
 	})
