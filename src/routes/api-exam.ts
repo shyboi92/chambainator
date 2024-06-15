@@ -81,6 +81,7 @@ bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'start_date').optional().isDate().toDate(),
 	apiValidatorParam(api, 'end_date').optional().isDate().toDate(),
+	apiValidatorParam(api, 'questions').isArray().toArray().optional(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
@@ -95,6 +96,16 @@ bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		else await db.query('UPDATE exam SET start_date = ? end_date = ? name = ? description = ? where id = ?', [req.api.params.start_date,req.api.params.end_date,req.api.params.name,req.api.params.description,req.api.params.exam_id]);
 
+		const questionIds = req.api.params.questions
+		if (questionIds !== null) {
+			await db.query('DELETE FROM exam_cont WHERE exam_id = ? '[req.api.params.exam_id]);
+        	questionIds.forEach((questionId: Number) => {
+            	db.insert('exam_cont', {
+                	exercise_id: questionId,
+                	exam_id: req.api.params.exam_id
+            })
+        });
+		}
 		req.ctx.logActivity('Sửa thông tin bài kiểm tra', { exam_id: req.api.params.exam_id });
 		req.api.sendSuccess();
 	}
@@ -106,12 +117,13 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 	
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const queryResult = await db.query("SELECT exam.name, exam.description, exam.start_date, exam.end_date, exam_cont.id FROM exam_cont INNER JOIN exam ON exam_cont.exam_id=exam.id WHERE exam.id = ?", [req.api.params.exam_id])
-		const examData = queryResult
+		const queryResult = await db.query("SELECT name, description, start_date, end_date FROM exam WHERE id = ?", [req.api.params.exam_id])
+		const examData = await db.query("SELECT id FROM exam_cont WHERE exam_id = ?", [req.api.params.exam_id])
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
+		req.api.sendSuccess(queryResult)
 		req.api.sendSuccess(examData)
 	}
 ))
