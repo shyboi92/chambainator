@@ -127,14 +127,7 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__LIST, api => apiRoute(router,api,
 			let args = []
 			
 			let sql2 = "INSERT INTO test_case (exercise_id, input, output, run_time) VALUES";
-			let test_cases
-
-			try {
-				test_cases = JSON.parse(req.api.params.test_cases);
-			} catch (e) {
-				console.error(e)
-				return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'hoh');
-			}
+			let test_cases = req.api.params.test_cases
 
 			test_cases.forEach((c: any) => {
 				const values = ` (?, ?, ?, ?),`

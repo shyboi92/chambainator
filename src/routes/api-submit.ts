@@ -59,8 +59,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		const originalFileExt = path.extname(req.files.data_file.name).toLowerCase();
 		const fileNameWithoutExt = path.parse(req.files.data_file.name).name
 
-		if (!['.c', '.cpp'].includes(originalFileExt))
-			return req.api.sendError(ErrorCodes.INVALID_UPLOAD_FILE_TYPE, 'Hệ thống chỉ nhận file mã nguồn C hoặc C++');
+		if (!['.c'].includes(originalFileExt))
+			return req.api.sendError(ErrorCodes.INVALID_UPLOAD_FILE_TYPE, 'Hệ thống chỉ nhận file mã nguồn C');
 
 		const BINARY_DATA = req.files.data_file.data
 		//#endregion
