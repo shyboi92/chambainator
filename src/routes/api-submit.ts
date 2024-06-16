@@ -41,14 +41,16 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	router, 
 	api,
 	
-	apiValidatorParam(api, 'exam_cont_id').trim().notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exam_id').trim().notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'description').trim().optional(),
-	apiValidatorParam(api, 'user_class_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'student_id').notEmpty().isInt().toInt(),
 	
 	async (req: ApiRequest) => {
 		//#region Nhận bài làm từ phía sinh viên gửi lên
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-
+		const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? class_id = ?',[req.api.params.exam_id,req.api.params.class_id]);
+		const resultquestionid = question_id[0]['id']; 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
@@ -74,7 +76,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 				student_id: req.api.params.user_class_id,
 				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
 				// exercise_id: req.api.params.exercise_id,
-				question_id: req.api.params.exam_cont_id,
+				question_id: resultquestionid,
 				description: req.api.params.description || null,
 				name: fileNameWithoutExt
 			})
@@ -163,7 +165,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET_FILE, api => apiRoute(
 ))
 
 bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
-	apiValidatorParam(api, 'question_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
