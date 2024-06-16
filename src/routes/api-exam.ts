@@ -107,6 +107,10 @@ bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 
         const questionIds = req.api.params.questions;
         if (questionIds && questionIds.length > 0) {
+			await db.query(
+                'DELETE FROM submission WHERE question_id IN (SELECT id FROM exam_cont WHERE exam_id = ?)', 
+                [req.api.params.exam_id]
+            );
             await db.query('DELETE FROM exam_cont WHERE exam_id = ?', [req.api.params.exam_id]);
             for (const questionId of questionIds) {
                 await db.insert('exam_cont', {
