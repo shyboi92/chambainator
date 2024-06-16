@@ -133,7 +133,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 
         const responseData = {
             exam: queryResult[0],  
-            exercise_ids: examData.map((row: any) => row.id)
+            exercise_ids: examData.map((row: any) => row.exercise_id)
         };
 
         req.api.sendSuccess(responseData);
