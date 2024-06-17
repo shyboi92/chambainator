@@ -265,6 +265,11 @@ export const API_EXAM= {
 		method: 'get',
 		roles: AUTHENTICATED_ROLES
 	},
+	EXAM__LIST__ALL: {
+		url: '/api/exam/list_all',
+		method: 'get',
+		roles: AUTHENTICATED_ROLES
+	},
 	EXAM__UPDATE_INFO: {
 		url: '/api/exam/update_info',
 		method: 'post',

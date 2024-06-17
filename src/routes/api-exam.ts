@@ -165,3 +165,33 @@ bindApiWithRoute(API_EXAM.EXAM__LIST, api => apiRoute(router,api,
 	}
 ))
 
+bindApiWithRoute(API_EXAM.EXAM__LIST__ALL, api => apiRoute(router,api,
+
+	async (req: ApiRequest, res: Response) => {
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+
+        let queryResult;
+
+    if (userInfo.role == Roles.STUDENT) {
+    const queryclass = await db.query("SELECT class_id FROM student WHERE user_id = ?", [userInfo.id]);
+
+    // Kiểm tra nếu không có class_id nào được trả về
+    if (queryclass.length === 0) {
+        queryResult = [];
+        } else {
+            const classIds = queryclass.map(row => row.class_id);
+            const placeholders = classIds.map(() => '?').join(',');
+            queryResult = await db.query(`SELECT * FROM exam WHERE class_id IN (${placeholders})`, classIds);
+        }
+    } else if (HIGHER_ROLES.includes(userInfo.role)) {
+    queryResult = await db.query("SELECT exam.id, exam.class_id, exam.name, exam.description, exam.start_date, exam.end_date, FROM exam JOIN class ON exam.class_id=class.id WHERE class.teacher_id = ? ", [userInfo.id]);
+    }
+
+    // Kiểm tra nếu queryResult là null hoặc undefined
+    queryResult = queryResult || [];
+		
+		const examArray = queryResult
+
+		req.api.sendSuccess({ exam: examArray })
+	}
+))
