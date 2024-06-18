@@ -152,25 +152,6 @@ bindApiWithRoute(API_CLASS.CLASS__ADD__USER, api => apiRoute(router, api,
 	}
 ))
 
-// bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api,
-// 	apiValidatorParam(api, 'student_id').notEmpty().isInt().toInt(),
-
-// 	async (req: ApiRequest, res: Response) => {
-// 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-// 		const r= await db.query("SELECT class.teacher_id FROM student INNER JOIN class ON student.class_id= class.id WHERE student.id = ? ",[req.api.params.student_id ])
-// 		const result = r[0]['teacher_id'];
-		
-// 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-// 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-
-// 		if (result!== userInfo.id && userInfo.role !== Roles.SYSTEM_ADMIN)
-// 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-// 		else await db.query('DELETE FROM student WHERE id = ?', [req.api.params.student_id]);
-
-// 		req.ctx.logActivity('xoa trong lớp học', { student_id: req.api.params.student_id });
-// 		req.api.sendSuccess();
-// 	}
-// ))
 bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api, apiValidatorParam(api, 'student_id').notEmpty().isInt().toInt(), 
 
 async (req: ApiRequest, res: Response) => {

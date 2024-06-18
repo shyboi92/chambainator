@@ -42,14 +42,14 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	api,
 	
 	apiValidatorParam(api, 'exam_id').trim().notEmpty().isInt().toInt(),
-	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'student_id').notEmpty().isInt().toInt(),
 	
 	async (req: ApiRequest) => {
 		//#region Nhận bài làm từ phía sinh viên gửi lên
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? class_id = ?',[req.api.params.exam_id,req.api.params.class_id]);
+		const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?',[req.api.params.exam_id,req.api.params.exercise_id]);
 		const resultquestionid = question_id[0]['id']; 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
@@ -73,7 +73,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		try {
 			await db.insert('submission', {
 				uuid: NEW_SUBMISSION_UUID,
-				student_id: req.api.params.user_class_id,
+				student_id: req.api.params.student_id,
 				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
 				// exercise_id: req.api.params.exercise_id,
 				question_id: resultquestionid,
