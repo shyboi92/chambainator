@@ -44,13 +44,41 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	apiValidatorParam(api, 'exam_id').trim().notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'description').trim().optional(),
-	apiValidatorParam(api, 'student_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 	
 	async (req: ApiRequest) => {
 		//#region Nhận bài làm từ phía sinh viên gửi lên
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?',[req.api.params.exam_id,req.api.params.exercise_id]);
-		const resultquestionid = question_id[0]['id']; 
+		let resultquestionid, resultstudentid;
+		try {
+			const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?', [req.api.params.exam_id, req.api.params.exercise_id]);
+			
+			if (question_id.length === 0) {
+				throw new Error('Không tìm thấy câu hỏi với exam_id và exercise_id đã cho.');
+			}
+		
+			resultquestionid = question_id[0]['id'];
+		} catch (error) {
+			console.error(error.message);
+		}
+		if (!resultquestionid) {
+            return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Không tìm thấy câu hỏi.');
+        }
+
+		try {
+			const student_id = await db.query('SELECT id FROM student WHERE user_id = ? AND class_id = ?', [userInfo.id, req.api.params.class_id]);
+			
+			if (student_id.length === 0) {
+				throw new Error('Không tìm thấy sinh viên với user_id với class_id đã cho.');
+			}
+		
+			resultstudentid = student_id[0]['class_id'];
+		} catch (error) {
+			console.error(error.message);
+		}
+		if (!resultstudentid) {
+            return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Không tìm thấy sinh vien trong lop.');
+        }
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
