@@ -150,8 +150,6 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
             const querystudent = await db.query("SELECT id FROM student WHERE user_id = ? AND class_id = ?", [userInfo.id,classId]);
             const studentId = querystudent[0]['id'];
 
-            const exerciseIds = examData.map(row => row.exercise_id);
-            const placeholders = examData.map(() => '?').join(',');
             const examconIds = examData.map(row => row.id);
             const examContPlaceholders = examconIds.map(() => '?').join(',');
 

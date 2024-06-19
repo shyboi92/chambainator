@@ -194,21 +194,35 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET_FILE, api => apiRoute(
 
 bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
 	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
-	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		let result;
-		let Creator ;
+		let Creator, resultquestionid ;
+		try {
+			const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?', [req.api.params.exam_id, req.api.params.exercise_id]);
+			
+			if (question_id.length === 0) {
+				throw new Error('Không tìm thấy câu hỏi với exam_id và exercise_id đã cho.');
+			}
+		
+			resultquestionid = question_id[0]['id'];
+		} catch (error) {
+			console.error(error.message);
+		}
+		if (!resultquestionid) {
+            return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Không tìm thấy câu hỏi.');
+        }
 
 		if (userInfo.role == Roles.STUDENT) {
 		Creator = await db.query("SELECT id FROM student WHERE user_id = ?",[userInfo.id])
 		const result1 = Creator[0]['id'];
 
-		const r= await db.query("SELECT * FROM submission WHERE student_id = ? question_id = ?",[result1, req.api.params.question_id])
+		const r= await db.query("SELECT * FROM submission WHERE student_id = ? question_id = ?",[result1, resultquestionid])
 		result = r;}
 		else {
-			const y= await db.query("SELECT * FROM submission WHERE question_id = ?", [req.api.params.question_id]);
+			const y= await db.query("SELECT * FROM submission WHERE question_id = ?", [resultquestionid]);
 			result = y;
 		}
 		
