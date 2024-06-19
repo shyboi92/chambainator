@@ -56,7 +56,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 			if (question_id.length === 0) {
 				throw new Error('Không tìm thấy câu hỏi với exam_id và exercise_id đã cho.');
 			}
-		
+
 			resultquestionid = question_id[0]['id'];
 		} catch (error) {
 			console.error(error.message);
@@ -68,6 +68,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		try {
 			const student_id = await db.query('SELECT id FROM student WHERE user_id = ? AND class_id = ?', [userInfo.id, req.api.params.class_id]);
 			
+			//console.log('userid: ',userInfo.id, ' classid: ',req.api.params.class_id,' studentid: ', student_id);
 			if (student_id.length === 0) {
 				throw new Error('Không tìm thấy sinh viên với user_id với class_id đã cho.');
 			}
@@ -76,6 +77,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		} catch (error) {
 			console.error(error.message);
 		}
+		//console.log('resultstudentid', resultstudentid)
 		if (!resultstudentid) {
             return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Không tìm thấy sinh vien trong lop.');
         }
@@ -101,7 +103,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		try {
 			await db.insert('submission', {
 				uuid: NEW_SUBMISSION_UUID,
-				student_id: req.api.params.student_id,
+				student_id: resultstudentid,
 				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
 				// exercise_id: req.api.params.exercise_id,
 				question_id: resultquestionid,
@@ -195,18 +197,19 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET_FILE, api => apiRoute(
 bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
 	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		let result;
-		let Creator, resultquestionid ;
+		let creator, resultquestionid ;
 		try {
 			const question_id = await db.query('SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?', [req.api.params.exam_id, req.api.params.exercise_id]);
 			
 			if (question_id.length === 0) {
 				throw new Error('Không tìm thấy câu hỏi với exam_id và exercise_id đã cho.');
 			}
-		
+			console.log (question_id)
 			resultquestionid = question_id[0]['id'];
 		} catch (error) {
 			console.error(error.message);
@@ -215,23 +218,21 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
             return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Không tìm thấy câu hỏi.');
         }
 
+		console.log(resultquestionid)
 		if (userInfo.role == Roles.STUDENT) {
-		Creator = await db.query("SELECT id FROM student WHERE user_id = ?",[userInfo.id])
-		const result1 = Creator[0]['id'];
-
-		const r= await db.query("SELECT * FROM submission WHERE student_id = ? question_id = ?",[result1, resultquestionid])
-		result = r;}
-		else {
-			const y= await db.query("SELECT * FROM submission WHERE question_id = ?", [resultquestionid]);
-			result = y;
+		creator = await db.query("SELECT id FROM student WHERE user_id = ? AND class_id = ? ",[userInfo.id, req.api.params.class_id])
+		const result1 = creator[0]['id'];
+		result= await db.query("SELECT * FROM submission WHERE student_id = ? AND question_id = ?",[result1, resultquestionid])
+		} else {
+			result = await db.query("SELECT * FROM submission WHERE question_id = ?", [resultquestionid]);
 		}
 		
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (Creator = null || !HIGHER_ROLES.includes(userInfo.role))
+		if (creator == null && !HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		
-		req.api.sendSuccess(result);
+		req.api.sendSuccess({list_submission : result});
 	}
 ))
