@@ -72,7 +72,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 				throw new Error('Không tìm thấy sinh viên với user_id với class_id đã cho.');
 			}
 		
-			resultstudentid = student_id[0]['class_id'];
+			resultstudentid = student_id[0]['id'];
 		} catch (error) {
 			console.error(error.message);
 		}
