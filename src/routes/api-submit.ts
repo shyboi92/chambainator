@@ -91,12 +91,17 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		const originalFileExt = path.extname(req.files.data_file.name).toLowerCase();
 		const fileNameWithoutExt = path.parse(req.files.data_file.name).name
 
-		if (!['.c'].includes(originalFileExt))
-			return req.api.sendError(ErrorCodes.INVALID_UPLOAD_FILE_TYPE, 'Hệ thống chỉ nhận file mã nguồn C');
+		if (!['.c','.cpp'].includes(originalFileExt))
+			return req.api.sendError(ErrorCodes.INVALID_UPLOAD_FILE_TYPE, 'Hệ thống chỉ nhận file mã nguồn C, C++');
 
 		const BINARY_DATA = req.files.data_file.data
+		let lang;
+    	if (originalFileExt === '.c') {
+        	lang = 'C';
+    	} else if (originalFileExt === '.cpp') {
+        	lang = 'C++';}
 		//#endregion
-		
+		console.log(lang);
 		//#region Lưu thông tin ban đầu của bài làm vào CSDL
 		const NEW_SUBMISSION_UUID = randomUUID()
 
@@ -108,6 +113,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 				// exercise_id: req.api.params.exercise_id,
 				question_id: resultquestionid,
 				description: req.api.params.description || null,
+				language: lang,
 				name: fileNameWithoutExt
 			})
 
@@ -148,7 +154,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET, api => apiRoute(
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const res = db.query("SELECT * FROM submission WHERE uuid = ?", [req.api.params.submission_id])
-		req.api.sendSuccess(res[0])
+		req.api.sendSuccess({submission : res[0]})
 	}
 ))
 
