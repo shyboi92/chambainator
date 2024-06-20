@@ -153,19 +153,15 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
             const examconIds = examData.map(row => row.id);
             const examContPlaceholders = examconIds.map(() => '?').join(',');
 
-            let querysubmit;
-            try{ querysubmit = await db.query(
+            const querysubmit = await db.query(
                 `SELECT question_id, COUNT(1) AS no_of_submit 
                  FROM submission 
                  WHERE question_id IN (${examContPlaceholders}) 
                  AND student_id = ?
                  GROUP BY question_id`, 
-                [...examconIds, studentId])
-            } catch(error) {
-                return req.api.sendError(ErrorCodes.INTERNAL_ERROR,"hoc sinh chua nop bai");
-            }
+                [...examconIds, studentId]);
 
-            const submissionMap = querysubmit.reduce((map, row) => {
+            const submissionMap = (querysubmit || []).reduce((map, row) => {
                 map[row.question_id] = row.no_of_submit > 0;
                 return map;
             }, {});
