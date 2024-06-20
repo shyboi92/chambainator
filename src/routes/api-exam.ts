@@ -161,7 +161,10 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
                  GROUP BY question_id`, 
                 [...examconIds, studentId]);
 
-            const submissionMap = (querysubmit || []).reduce((map, row) => {
+                if (!querysubmit || querysubmit.length === 0) {
+                    return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, "không tìm thấy bài nộp phù hợp");
+                }    
+            const submissionMap = querysubmit .reduce((map, row) => {
                 map[row.question_id] = row.no_of_submit > 0;
                 return map;
             }, {});
