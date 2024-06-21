@@ -138,7 +138,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 
 		//#region Lưu bài làm vào kho bài gửi lên
 		const SUBMIT_PATH = process.env['SUBMISSION_PATH']
-		const FILE_PATH = SUBMIT_PATH + '/' + NEW_SUBMISSION_UUID + originalFileExt
+		const FILE_PATH = SUBMIT_PATH + '/' + NEW_SUBMISSION_UUID + '.' + originalFileExt
 		fs.writeFileSync(FILE_PATH, BINARY_DATA);
 		//#endregion
 
