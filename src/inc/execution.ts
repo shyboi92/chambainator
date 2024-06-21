@@ -5,11 +5,53 @@ import db from '../inc/database.js';
 const MS_PER_SEC = 1e3
 const NS_PER_SEC = 1e9
 
-export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
-	const EXE_PATH = process.env['EXE_PATH'] + '/' + uuid
-	let srcPath = sourceFilePath
+export enum Language {
+	C = 'C',
+	CPP = 'C++'
+}
 
-	let compileCmd = `gcc -o ${EXE_PATH} ${srcPath}`
+export const LANG_EXT_MAP = {
+	[Language.C]: ['c', 'h'],
+	[Language.CPP]: ['cpp', 'hpp', 'h', 'cc', 'cxx']
+};
+
+export const LANG_COMPILER_MAP = {
+	[Language.C]: 'gcc',
+	[Language.CPP]: 'g++'
+}
+
+export function findLanguageByExtension(extension: string): string | null {
+	for (const [language, extensions] of Object.entries(LANG_EXT_MAP)) {
+		if (extensions.includes(extension)) {
+			return language;
+		}
+	}
+	return null;
+}
+
+function findCompilerByLang(lang: Language): string {
+	return LANG_COMPILER_MAP[lang]
+}
+
+interface SubmissionInfo {
+	uuid: string,
+	path: string,
+	lang: Language
+}
+
+export async function evaluateSubmission({ uuid, path: sourceFilePath, lang }: SubmissionInfo) {
+	const EXE_PATH = process.env['EXE_PATH'] + '/' + uuid
+
+	let compileCmd: string
+	if ([Language.C, Language.CPP].includes(lang)) {
+		// Cú pháp câu lệnh biên dịch C và C++ là gần như tương tự nhau,
+		// chỉ khác tên chương trình biên dịch (gcc và g++)
+
+		const compiler = findCompilerByLang(lang)
+		compileCmd = `${compiler} -o ${EXE_PATH} ${sourceFilePath}`
+	} else {
+		throw new Error("Không biết biên dịch ngôn ngữ " + lang + " kiểu gì.")
+	}
 
 	//#region Biên dịch chương trình
 	try {
@@ -25,7 +67,7 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 
 	//#region Lấy test case và các thông tin liên quan đến bài nộp
 	const TEST_CASES = await db.query("SELECT * FROM test_case WHERE exercise_id = (SELECT ec.exercise_id FROM submission s JOIN exam_cont ec ON ec.id = s.question_id WHERE uuid = ?)", [uuid])
-	
+
 	/**
 	 * Object lưu kết quả chạy của từng test case.
 	 * Trong đó:
@@ -56,11 +98,11 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath }) {
 
 			const RESULT = actualOutput.trim() == desiredOutput.trim()
 			TEST_RESULT[TEST_CASE_ID] = RESULT
-			
+
 			if (RESULT) {
 				console.info(`Bài làm ${uuid}, test case ${TEST_CASE_ID}: Kết quả khớp`)
 			} else {
-				console.info(`Bài làm ${uuid}, test case ${TEST_CASE_ID}: Lệch kết quả`)	
+				console.info(`Bài làm ${uuid}, test case ${TEST_CASE_ID}: Lệch kết quả`)
 			}
 		} catch (e) {
 			TEST_RESULT[TEST_CASE_ID] = false
