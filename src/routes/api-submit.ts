@@ -150,9 +150,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	}
 ))
 
-bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET, api => apiRoute(
-	router,
-	api,
+bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET, api => apiRoute( router, api,
 
 	apiValidatorParam(api, 'submission_id').notEmpty().isString(),
 
@@ -164,8 +162,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET, api => apiRoute(
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-		const res = db.query("SELECT * FROM submission WHERE uuid = ?", [req.api.params.submission_id])
-		req.api.sendSuccess({submission : res[0]})
+		const res = await db.query("SELECT * FROM submission WHERE uuid = ?", [req.api.params.submission_id])
+		return req.api.sendSuccess( res[0])
 	}
 ))
 
