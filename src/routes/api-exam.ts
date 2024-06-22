@@ -163,7 +163,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
                 [...examconIds, studentId]);
 
             const submissionMap = (querysubmit || [] ) .reduce((map, row) => {
-                map[row.question_id] = row.uuid || null;
+                map[row.question_id] = row.uuid ;
                 return map;
             }, {});
 
