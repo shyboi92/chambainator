@@ -170,7 +170,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
             const examCont = examData.map(row => ({
                 questions_id: row.id,
                 exercise_id: row.exercise_id,
-                submitted: submissionMap[row.id]
+                submitted: submissionMap[row.id] || null
             }));
 
             responseData = {
