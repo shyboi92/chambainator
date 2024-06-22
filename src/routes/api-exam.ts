@@ -153,19 +153,19 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
             const examconIds = examData.map(row => row.id);
             const examContPlaceholders = examconIds.map(() => '?').join(',');
 
-            const querysubmit = await db.query(
-                `SELECT question_id, uuid 
-                 FROM submission 
-                 WHERE question_id IN (${examContPlaceholders}) 
-                 AND student_id = ?
-                 ORDER BY date_time DESC
-                 LIMIT 1`, 
-                [...examconIds, studentId]);
-
-            const submissionMap = (querysubmit || [] ) .reduce((map, row) => {
-                map[row.question_id] = row.uuid || null;
-                return map;
-            }, {});
+            const submissionMap = {};
+            for (const questionId of examconIds) {
+                const querySubmit = await db.query(
+                    `SELECT uuid 
+                     FROM submission 
+                     WHERE question_id = ? 
+                     AND student_id = ?
+                     ORDER BY date_time DESC
+                     LIMIT 1`, 
+                    [questionId, studentId]
+                );
+                submissionMap[questionId] = querySubmit.length ? querySubmit[0].uuid : null;
+            }
 
             const examCont = examData.map(row => ({
                 questions_id: row.id,
