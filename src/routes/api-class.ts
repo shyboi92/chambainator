@@ -97,7 +97,7 @@ bindApiWithRoute(API_CLASS.CLASS__GET, api => apiRoute(router, api,
 		if (userInfo.role == Roles.SYSTEM_ADMIN){
 			queryResult = await db.query("SELECT * FROM class WHERE id = ?", [req.api.params.class_id])
 		} else if (userInfo.role == Roles.TEACHER) {
-			queryResult = await db.query("SELECT * FROM class WHERE id = ? teacher_id = ?", [req.api.params.class_id, userInfo.id])
+			queryResult = await db.query("SELECT * FROM class WHERE id = ? AND teacher_id = ?", [req.api.params.class_id, userInfo.id])
 		} else if (userInfo.role == Roles.STUDENT) {
 			queryResult = await db.query("SELECT * FROM student INNER JOIN class ON student.class_id=class.id WHERE student.user_id = ? AND student.class_id = ?",[userInfo.id, req.api.params.class_id ])
 		}	
