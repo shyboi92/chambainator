@@ -218,7 +218,7 @@ bindApiWithRoute(API.USER__GET, api => apiRoute(router, api,
 
 bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
 	apiValidatorParam(api, 'enabled').optional().isBoolean().toBoolean(),
-	apiValidatorParam(api, 'paging.page').optional().isInt().toInt(),
+	apiValidatorParam(api, 'paging_page').optional().isInt().toInt(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
@@ -237,9 +237,9 @@ bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
 		const page_count = Math.floor((item_count + config.LIST_ITEMS_PER_PAGE - 1) / config.LIST_ITEMS_PER_PAGE);
 
 		let query = `${selectClause} ${fromClause} ${whereClause}`;
-		if (req.api.params.paging?.page) {
-			if (req.api.params.paging?.page <= 0 || req.api.params.paging?.page > page_count) req.api.sendError(ErrorCodes.PAGE_OUT_OF_RANGE);
-			query += ` limit ${(req.api.params.paging.page - 1) * config.LIST_ITEMS_PER_PAGE}, ${config.LIST_ITEMS_PER_PAGE}`;
+		if (req.api.params.paging_page) {  // Đổi từ req.api.params.paging?.page thành req.api.params.paging_page
+			if (req.api.params.paging_page <= 0 || req.api.params.paging_page > page_count) req.api.sendError(ErrorCodes.PAGE_OUT_OF_RANGE);
+			query += ` limit ${(req.api.params.paging_page - 1) * config.LIST_ITEMS_PER_PAGE}, ${config.LIST_ITEMS_PER_PAGE}`;
 		}
 
 		const list = await db.query(query, params);
@@ -261,7 +261,8 @@ bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
 			})
 		});
 	}
-))
+));
+
 
 
 bindApiWithRoute(API.USER__NOTIFICATION__UNREAD_COUNT, api => apiRoute(router,api,
