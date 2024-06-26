@@ -10,12 +10,12 @@ export enum Language {
 	CPP = 'C++'
 }
 
-export const LANG_EXT_MAP = {
-	[Language.C]: ['c', 'h'],
-	[Language.CPP]: ['cpp', 'hpp', 'h', 'cc', 'cxx']
+export const LANG_EXT_MAP: { [key in Language]: string } = {
+	[Language.C]: 'c',
+	[Language.CPP]: 'cpp'
 };
 
-export const LANG_COMPILER_MAP = {
+export const LANG_COMPILER_MAP: { [key in Language]: string } = {
 	[Language.C]: 'gcc',
 	[Language.CPP]: 'g++'
 }
@@ -29,6 +29,15 @@ export function findLanguageByExtension(extension: string): string | null {
 	return null;
 }
 
+export function getEnumEntry(value: string): Language | undefined {
+	for (let key in Language) {
+		if (Language[key as keyof typeof Language] === value) {
+			return Language[key as keyof typeof Language];
+		}
+	}
+	return undefined;
+}
+
 function findCompilerByLang(lang: Language): string {
 	return LANG_COMPILER_MAP[lang]
 }
@@ -38,6 +47,7 @@ interface SubmissionInfo {
 	path: string,
 	lang: Language
 }
+
 
 export async function evaluateSubmission({ uuid, path: sourceFilePath, lang }: SubmissionInfo) {
 	const EXE_PATH = process.env['EXE_PATH'] + '/' + uuid

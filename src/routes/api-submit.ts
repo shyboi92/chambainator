@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import {ErrorCodes, Roles, AUTHENTICATED_ROLES, UserInfo, API_SUBMISSION, HIGHER_ROLES} from '../inc/constants.js';
 import db from '../inc/database.js';
-import { LANG_EXT_MAP, Language, evaluateSubmission, findLanguageByExtension } from '../inc/execution.js';
+import { LANG_EXT_MAP, Language, evaluateSubmission, findLanguageByExtension, getEnumEntry } from '../inc/execution.js';
 
 import {apiRoute, bindApiWithRoute, apiValidatorParam, ApiRequest} from '../inc/api.js';
 import path from 'path';
@@ -37,6 +37,16 @@ function getFileByUUID(directory: string, uuid: string): Promise<string> {
 }
 
 
+bindApiWithRoute(API_SUBMISSION.SUBMISSION_LIST_LANGUAGES, api => apiRoute(
+	router,
+	api,
+
+	async (req: ApiRequest) => {
+		const arrayOfLangs = Object.values(Language)
+		return req.api.sendSuccess(arrayOfLangs)
+	}
+))
+
 
 bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	router,
@@ -45,6 +55,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 	apiValidatorParam(api, 'exam_id').trim().notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'description').trim().optional(),
+	apiValidatorParam(api, 'source_code').notEmpty(),
+	apiValidatorParam(api, 'language').trim().notEmpty(),
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest) => {
@@ -95,37 +107,32 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		if (!req.files?.data_file)
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Chưa gửi file bài làm');
 
-		const originalFileExt = path.extname(req.files.data_file.name).toLowerCase().slice(1);
-		const fileNameWithoutExt = path.parse(req.files.data_file.name).name
-
-		const acceptedExts = LANG_EXT_MAP['C'].concat(LANG_EXT_MAP['C++'])
-		if (!acceptedExts.includes(originalFileExt))
-			return req.api.sendError(ErrorCodes.INVALID_UPLOAD_FILE_TYPE, 'Hệ thống chỉ nhận file mã nguồn C, C++');
-
-		const BINARY_DATA = req.files.data_file.data
+		const codeInPlainText = req.api.params['source_code']
 
 		// Bài làm là ngôn ngữ gì
-		const lang = findLanguageByExtension(originalFileExt) as Language
-		if (lang == null) {
-			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, 'Chả biết bài làm là ngôn ngữ gì.')
+		const lang = getEnumEntry(req.api.params['language'])
+		if (!lang) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, 'Ngôn ngữ lập trình này không được hỗ trợ bởi hệ thống.')
 		}
 
+		// Tìm đuôi tương ứng (sẽ dùng khi ghi file bài làm vào kho)
+		const ext = LANG_EXT_MAP[lang]
 		//#endregion
 
 
 		//#region Lưu thông tin ban đầu của bài làm vào CSDL
 		const NEW_SUBMISSION_UUID = randomUUID()
+		const isoDate = new Date().toISOString().slice(0, 19).replace('T', ' ')
 
 		try {
 			await db.insert('submission', {
 				uuid: NEW_SUBMISSION_UUID,
 				student_id: targetStudentId,
-				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-				// exercise_id: req.api.params.exercise_id,
+				date_time: isoDate,
 				question_id: targetQuestionId,
 				description: req.api.params.description || null,
 				language: lang,
-				name: fileNameWithoutExt
+				name: null
 			})
 
 			console.info('Ghi nhận bài làm mới với UUID:', NEW_SUBMISSION_UUID)
@@ -138,8 +145,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 
 		//#region Lưu bài làm vào kho bài gửi lên
 		const SUBMIT_PATH = process.env['SUBMISSION_PATH']
-		const FILE_PATH = SUBMIT_PATH + '/' + NEW_SUBMISSION_UUID + '.' + originalFileExt
-		fs.writeFileSync(FILE_PATH, BINARY_DATA);
+		const FILE_PATH = SUBMIT_PATH + '/' + NEW_SUBMISSION_UUID + '.' + ext
+		fs.writeFileSync(FILE_PATH, codeInPlainText);
 		//#endregion
 
 		req.api.sendSuccess({ submission_id: NEW_SUBMISSION_UUID });

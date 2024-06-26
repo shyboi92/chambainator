@@ -147,7 +147,7 @@ export const API_COURSE= {
 	},
 }
 export const API_CLASS= {
-	 
+
 	CLASS__CREATE: {
 		url: '/api/class/create',
 		method: 'post',
@@ -283,6 +283,12 @@ export const API_EXAM= {
 }
 
 export const API_SUBMISSION = {
+	SUBMISSION_LIST_LANGUAGES: {
+		url: '/api/submission/languages',
+		method: 'get',
+		roles: AUTHENTICATED_ROLES
+	},
+
 	SUBMISSION__CREATE: {
 		url: '/api/submission/create',
 		method: 'post',
@@ -315,7 +321,7 @@ export interface UserInfo {
 	password?: string;
 	role: Roles;
 	enabled?: boolean;
-	
+
 	creation_time?: string;
 	last_login_time?: string | null;
 	last_update_time?: string;
