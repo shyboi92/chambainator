@@ -295,6 +295,11 @@ export const API_SUBMISSION = {
 		roles: AUTHENTICATED_ROLES
 	},
 
+	SUBMISSION__CREATE__BYTEXT: {
+		url: '/api/submission/create_bytext',
+		method: 'post',
+		roles: AUTHENTICATED_ROLES
+	},
 	SUBMISSION__LIST: {
 		url: '/api/submission/list',
 		method: 'get',
