@@ -216,54 +216,70 @@ bindApiWithRoute(API.USER__GET, api => apiRoute(router, api,
 
 
 
-bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
-	apiValidatorParam(api, 'enabled').optional().isBoolean().toBoolean(),
-	apiValidatorParam(api, 'paging_page').optional().isInt().toInt(),
+// bindApiWithRoute(API.USER__LIST, api => apiRoute(router, api,
+// 	apiValidatorParam(api, 'enabled').optional().isBoolean().toBoolean(),
+// 	apiValidatorParam(api, 'paging_page').optional().isInt().toInt(),
+
+// 	async (req: ApiRequest, res: Response) => {
+// 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+
+// 		const params: any[] = [];
+// 		const selectClause = 'select u.id, u.username, u.fullname, u.role, u.enabled, u.creation_time, u.last_login_time, u.last_update_time';
+// 		const fromClause = 'from user u';
+// 		let whereClause = 'where 1';
+
+// 		if (req.api.params.hasOwnProperty('enabled')) {
+// 			whereClause += ' and enabled = ?';
+// 			params.push(req.api.params.enabled);
+// 		}
+
+// 		const item_count = await db.queryValue(`select count(*) ${fromClause} ${whereClause}`, params) as number;
+// 		const page_count = Math.floor((item_count + config.LIST_ITEMS_PER_PAGE - 1) / config.LIST_ITEMS_PER_PAGE);
+
+// 		let query = `${selectClause} ${fromClause} ${whereClause}`;
+// 		if (req.api.params.paging_page) {  // Đổi từ req.api.params.paging?.page thành req.api.params.paging_page
+// 			if (req.api.params.paging_page <= 0 || req.api.params.paging_page > page_count) req.api.sendError(ErrorCodes.PAGE_OUT_OF_RANGE);
+// 			query += ` limit ${(req.api.params.paging_page - 1) * config.LIST_ITEMS_PER_PAGE}, ${config.LIST_ITEMS_PER_PAGE}`;
+// 		}
+
+// 		const list = await db.query(query, params);
+// 		req.api.sendSuccess({
+// 			item_count,
+// 			page_count,
+// 			user_info: list.map(e => {
+// 				const item: UserInfo = {
+// 					id: e.id,
+// 					username: e.username,
+// 					fullname: e.fullname,
+// 					role: e.role,
+// 					enabled: e.enabled == 1,
+// 					creation_time: e.creation_time,
+// 					last_login_time: e.last_login_time,
+// 					last_update_time: e.last_update_time,
+// 				}	
+// 				return item;
+// 			})
+// 		});
+// 	}
+// ));
+
+bindApiWithRoute(API.USER__LIST, api => apiRoute( router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
-		const params: any[] = [];
-		const selectClause = 'select u.id, u.username, u.fullname, u.role, u.enabled, u.creation_time, u.last_login_time, u.last_update_time';
-		const fromClause = 'from user u';
-		let whereClause = 'where 1';
+		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (req.api.params.hasOwnProperty('enabled')) {
-			whereClause += ' and enabled = ?';
-			params.push(req.api.params.enabled);
-		}
+		if ( notAdmin)
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-		const item_count = await db.queryValue(`select count(*) ${fromClause} ${whereClause}`, params) as number;
-		const page_count = Math.floor((item_count + config.LIST_ITEMS_PER_PAGE - 1) / config.LIST_ITEMS_PER_PAGE);
+		const users = await db.query(`select id ,username, fullname, role, enabled , creation_time, last_login_time , last_update_time FROM user `)
 
-		let query = `${selectClause} ${fromClause} ${whereClause}`;
-		if (req.api.params.paging_page) {  // Đổi từ req.api.params.paging?.page thành req.api.params.paging_page
-			if (req.api.params.paging_page <= 0 || req.api.params.paging_page > page_count) req.api.sendError(ErrorCodes.PAGE_OUT_OF_RANGE);
-			query += ` limit ${(req.api.params.paging_page - 1) * config.LIST_ITEMS_PER_PAGE}, ${config.LIST_ITEMS_PER_PAGE}`;
-		}
-
-		const list = await db.query(query, params);
-		req.api.sendSuccess({
-			item_count,
-			page_count,
-			user_info: list.map(e => {
-				const item: UserInfo = {
-					id: e.id,
-					username: e.username,
-					fullname: e.fullname,
-					role: e.role,
-					enabled: e.enabled == 1,
-					creation_time: e.creation_time,
-					last_login_time: e.last_login_time,
-					last_update_time: e.last_update_time,
-				}	
-				return item;
-			})
-		});
+		req.api.sendSuccess({ users: users })
 	}
-));
-
-
+))
 
 bindApiWithRoute(API.USER__NOTIFICATION__UNREAD_COUNT, api => apiRoute(router,api,
 	async (req: ApiRequest, res: Response) => {
