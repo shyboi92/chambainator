@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@dodona/dolos": "^2.7.1",
     "archiver": "^6.0.1",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.3",
@@ -39,6 +40,7 @@
     "mysql2": "^3.5.2",
     "mysqldump": "^3.2.0",
     "node-cron": "^3.0.2",
+    "openai": "^4.52.2",
     "path-equal": "^1.2.5",
     "session-file-store": "^1.5.0",
     "typescript": "^5.4.5",
