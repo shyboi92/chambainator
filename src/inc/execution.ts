@@ -22,12 +22,12 @@ export const LANG_COMPILER_MAP: { [key in Language]: string } = {
 
 export function findLanguageByExtension(extension: string): string | null {
 	for (const [language, extOfLang] of Object.entries(LANG_EXT_MAP)) {
-	  if (extOfLang == extension) {
-		return language;
-	  }
+		if (extOfLang == extension) {
+			return language;
+	  	}
 	}
 	return null;
-  }
+}
 
 export function getEnumEntry(value: string): Language | undefined {
 	for (let key in Language) {
