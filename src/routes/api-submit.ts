@@ -403,15 +403,3 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 		return req.api.sendSuccess({ question: questionresult, list_check: res });
 	}
 ));
-
-bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK__HARD, api => apiRoute(router, api,
-
-	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
-
-	async (req: ApiRequest) => {
-		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		let newExamId = req.api.params.exam_id; 
-		doDiff(newExamId).catch(e => console.error(e))
-		return req.api.sendSuccess();
-	}
-));
