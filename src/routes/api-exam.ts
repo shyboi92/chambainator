@@ -4,7 +4,7 @@ import { scheduleJob } from 'node-schedule';
 import { ErrorCodes, Roles, AUTHENTICATED_ROLES, UserInfo, API_EXAM } from '../inc/constants.js';
 import db from '../inc/database.js';
 import { apiRoute, bindApiWithRoute, apiValidatorParam, ApiRequest } from '../inc/api.js';
-import doDiff from '../case-diff/main'
+import doDiff from '../case-diff/main.js'
 
 const router = Router();
 export default router;

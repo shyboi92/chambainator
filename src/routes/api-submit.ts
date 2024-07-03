@@ -365,29 +365,41 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
 	}
 ))
 
-bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute( router, api,
+bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 
 	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 
 	async (req: ApiRequest) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const r = await db.query("SELECT c.teacher_id FROM class c JOIN exam e ON c.id = e.class_id WHERE e.id = ?",[req.api.params.exam_id])
+
+		// Truy vấn để lấy teacher_id
+		const r = await db.query("SELECT c.teacher_id FROM class c JOIN exam e ON c.id = e.class_id WHERE e.id = ?", [req.api.params.exam_id]);
+		if (r == null || r.length == 0) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Không tìm thấy thông tin lớp học");
+		}
 		const result = r[0]['teacher_id'];
 
-		const questionquery = await db.query("SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?",[req.api.params.exam_id, req.api.params.exercise_id]);
-		console.log(questionquery);
+		// Truy vấn để lấy question_id
+		const questionquery = await db.query("SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?", [req.api.params.exam_id, req.api.params.exercise_id]);
+		if (questionquery == null || questionquery.length == 0) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Không tìm thấy câu hỏi");
+		}
 		const questionresult = questionquery[0]['id'];
-		console.log(questionresult);
+
+		// Kiểm tra quyền truy cập
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
 		if (result != userInfo.id && ![Roles.SYSTEM_ADMIN].includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-		const res = await db.query("SELECT id, sub_id1, sub_id2, result FROM check_sub WHERE question_id = ?", [questionresult])
-		if (res == null) return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chua het han kiem tra");
+		// Truy vấn để lấy thông tin kiểm tra
+		const res = await db.query("SELECT id, sub_id1, sub_id2, result FROM check_sub WHERE question_id = ?", [questionresult]);
+		if (res == null || res.length == 0) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
+		}
 
-		return req.api.sendSuccess({question : questionresult, list_check: res})
+		return req.api.sendSuccess({ question: questionresult, list_check: res });
 	}
-))
+));
