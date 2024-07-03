@@ -1,5 +1,5 @@
 //hàm kiểm tra xem có phải ký tự đầu dòng không
-function checkFirstLineChar(theAnswer, n) {
+export function checkFirstLineChar(theAnswer, n) {
 	if (n === 0)
 		return true;
 	else {
@@ -11,7 +11,7 @@ function checkFirstLineChar(theAnswer, n) {
 }
 
 //hàm kiểm tra đây phải ký tự số không
-function checkCharNum(theAnswer, n) {
+export function checkCharNum(theAnswer, n) {
 	return (theAnswer[n] === '0' ||
 			theAnswer[n] === '1' ||
 			theAnswer[n] === '2' ||
@@ -25,7 +25,7 @@ function checkCharNum(theAnswer, n) {
 }
 
 //hàm chuyễn chuỗi string số thành số
-function findRealNumber(theAnswer, n) {
+export function findRealNumber(theAnswer, n) {
 	let numNum = new Array(5);
 	let countNum = 0;
 	while (checkCharNum(theAnswer, n)) {
@@ -41,7 +41,7 @@ function findRealNumber(theAnswer, n) {
 }
 
 //hàm đếm xem dãy ký tự số có bao nhiêu chữ số
-function findRealStep(theAnswer, n) {
+export function findRealStep(theAnswer, n) {
 	let countNum = 0;
 	while (checkCharNum(theAnswer, n)) {
 		countNum++;
@@ -51,7 +51,7 @@ function findRealStep(theAnswer, n) {
 }
 
 //hàm tạo kết quả so sánh thành chuỗi string
-function makeStringResult(lineCode) {
+export function makeStringResult(lineCode) {
 	let chuoiString = '';
 	let chuoiNumber = [];
 	let dau = cuoi = 1;
@@ -91,7 +91,7 @@ function makeStringResult(lineCode) {
 }
 
 //hàm tạo kết quả
-function makeResult(theAnswer, lengthCode1, lengthCode2) {
+export function makeResult(theAnswer, lengthCode1, lengthCode2) {
 	let lineCode1 = new Array(lengthCode1 + 1).fill(true);
 	let lineCode2 = new Array(lengthCode2 + 1).fill(true);
 	let numSimilarLine1 = 0;
@@ -186,10 +186,3 @@ function makeResult(theAnswer, lengthCode1, lengthCode2) {
 
 	return childObj;
 }
-
-export const checkFirstLineChar = checkFirstLineChar;
-export const checkCharNum = checkCharNum;
-export const findRealNumber = findRealNumber;
-export const findRealStep = findRealStep;
-export const makeStringResult = makeStringResult;
-export const makeResult = makeResult;
