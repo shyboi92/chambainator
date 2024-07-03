@@ -316,6 +316,11 @@ export const API_SUBMISSION = {
 		method: 'get',
 		roles: HIGHER_ROLES
 	},
+	SUBMISSION__CHECK__HARD: {
+		url: '/api/submission/check_hard',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
 	SUBMISSION__GET_FILE: {
 		url: '/api/submission/get-file',
 		method: 'get',

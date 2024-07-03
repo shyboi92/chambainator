@@ -1,7 +1,7 @@
 import db from '../inc/database.js';
 
 export function changeNull(dataUUID, newData) {
-	db.query('UPDATE submit SET checked = ? WHERE uuid = ?', [newData, dataUUID])
+	db.query('UPDATE submission SET checked = ? WHERE uuid = ?', [newData, dataUUID])
 }
 
 export function addCheckSub(uuid1, uuid2, content, question_id) {
