@@ -140,6 +140,11 @@ export const API_COURSE= {
 		method: 'get',
 		roles: HIGHER_ROLES
 	},
+	COURSE__USER__LIST: {
+		url: '/api/course/user_list',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
 	COURSE__GET: {
 		url: '/api/course/get',
 		method: 'get',
