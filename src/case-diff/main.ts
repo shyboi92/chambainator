@@ -1,14 +1,13 @@
 import fs from 'fs';
 
-import callDiffUbuntu from './callDiff';
-import callDolos from './processDolosResult';
+import callDiffUbuntu from './callDiff.js';
+import callDolos from './processDolosResult.js';
 import { makeTheQuestionForChatGPT, callChatGPT, getTheRateSimilar } from './callChatGPT.js'
-import { makeResult } from './processResult';
-import { executeDolos } from './runDolosFromLinux';
-
+import { makeResult } from './processResult.js';
+import { executeDolos } from './runDolosFromLinux.js';
+import { addCheckSub, changeNull } from './dbHelpers.js';
 import db from '../inc/database.js';
 import { LANG_EXT_MAP } from '../inc/execution.js';
-import { addCheckSub, changeNull } from './dbHelpers.js';
 
 /**
 * Kiểm tra các bài làm trong một bài thi
