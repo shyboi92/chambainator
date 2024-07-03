@@ -165,11 +165,11 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 			for (const questionId of examconIds) {
 				const querySubmit = await db.query(
 					`SELECT uuid
-					 FROM submission
-					 WHERE question_id = ?
-					 AND student_id = ?
-					 ORDER BY date_time DESC
-					 LIMIT 1`,
+					FROM submission
+					WHERE question_id = ?
+					AND student_id = ?
+					ORDER BY date_time DESC
+					LIMIT 1`,
 					[questionId, studentId]
 				);
 				submissionMap[questionId] = querySubmit.length ? querySubmit[0].uuid : null;
