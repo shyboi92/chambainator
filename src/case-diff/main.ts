@@ -8,31 +8,39 @@ import { executeDolos } from './runDolosFromLinux';
 
 import db from '../inc/database.js';
 import { LANG_EXT_MAP } from '../inc/execution.js';
+import { addCheckSub, changeNull } from './dbHelpers.js';
 
 /**
 * Kiểm tra các bài làm trong một bài thi
 * @param {Number} id ID của bài thi
-* @returns {Promise<Object>} Kết quả so sánh
 */
-export default async function main(id: number): Promise<Object | null> {
+export default async function main(id: number): Promise<void> {
 	// Lấy danh sách các câu hỏi
-	const quesion_idArr = await db.query("SELECT id, exercise_id FROM exam_cont WHERE exam_id = ?", [id]);
+	const zut: Array<any> = await db.query("SELECT id, exercise_id FROM exam_cont WHERE exam_id = ?", [id]);
+	const questions: Array<number> = zut.map(z => z.exercise_id)
 
-	quesion_idArr.forEach(async (quesion_ID: number) => {
+	questions.forEach(async (questionId: number) => {
 
 		/**
 		* UUID các bài nộp mới nhất của tất cả sinh viên cho câu hỏi này
 		*/
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		///// TODO: điền nốt câu query  . Đại khái là
-		///// select * from submit where exam_cont_id = ? group by student_id ...
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		const latestSubmissions: Array<any> = await db.query(" WHERE exam_cont_id = ?", [quesion_ID])
+		const latestSubmissions: Array<any> = await db.query(
+			`SELECT
+				s1.*
+			FROM submission s1
+			JOIN (
+				SELECT
+					student_id,
+					MAX(date_time) AS latest_date_time
+				FROM submission
+				WHERE question_id = ?
+				GROUP BY student_id
+			) s2
+				ON s1.student_id = s2.student_id AND s1.date_time = s2.latest_date_time
+			WHERE s1.question_id = ?`,
+			[questionId, questionId]
+		)
 
-		// Nếu ko có từ 2 bài trở lên thì thôi
-		if (!(latestSubmissions.length >= 2)) {
-			return null
-		}
 
 		for (let i = 0; i < latestSubmissions.length; i++) {
 			// File gốc
@@ -152,12 +160,21 @@ export default async function main(id: number): Promise<Object | null> {
 					mang.push(objDolos);
 
 					if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
-						return mang
+						const resultJson = JSON.stringify(mang, replacer, 2).replace(/"\[(.*?)\]"/, "[$1]");
+
+						addCheckSub(latestSubmissions[i].uuid, latestSubmissions[j].uuid, resultJson, questionId);
 					}
 				}
 			}
+
+			changeNull(nameBaseFile, 1);
 		}
 	})
+}
 
-	return null;
+function replacer(key, value) {
+	if (key === "contentSimilarFile1" || key === "contentSimilarFile2") {
+		return JSON.stringify(value);
+	}
+	return value;
 }
