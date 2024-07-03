@@ -14,8 +14,8 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'name').trim().optional(),
 	apiValidatorParam(api, 'description').trim().optional(),
-	apiValidatorParam(api, 'start_date').notEmpty().isDate().toDate(),
-	apiValidatorParam(api, 'end_date').notEmpty().isDate().toDate(),
+	apiValidatorParam(api, 'start_date').notEmpty().isISO8601().toDate(),
+	apiValidatorParam(api, 'end_date').notEmpty().isISO8601().toDate(),
 	apiValidatorParam(api, 'questions').isArray().toArray(),
 
 	async (req: ApiRequest, res: Response) => {
@@ -55,11 +55,7 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 
 		// Thực hiện so sánh các bài làm khi tới thời điểm kết thúc của bài thi
 		const job = scheduleJob(endDate, () => {
-			doDiff(newExamId)
-				.then(result => {
-					// ... chèn kết quả so sánh vào db
-				})
-				.catch(e => console.error(e))
+			doDiff(newExamId).catch(e => console.error(e))
 		})
 	}
 ))
