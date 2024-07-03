@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 //hàm kết nối ChatGPT, hỏi và nhận lại câu trả lời
-const callChatGPT = async (theQuestion) => {
+export const callChatGPT = async (theQuestion) => {
 	const openai = new OpenAI({
 		apiKey: process.env.OPENAI_KEY
 	})
@@ -21,7 +21,7 @@ const callChatGPT = async (theQuestion) => {
 }
 
 //hàm nhận nội dung 2 file và tạo ra câu hỏi ChatGPT
-function makeTheQuestionForChatGPT(contentRootFile, contentCompFile) {
+export function makeTheQuestionForChatGPT(contentRootFile, contentCompFile) {
 	let theQuestion = `What is the percentage of similarity of the following 2 codes? Show only conclusion and don't include any explanation.\n`
 		+ `Code 1:\n"`
 		+ contentRootFile + `".\n`
@@ -31,7 +31,7 @@ function makeTheQuestionForChatGPT(contentRootFile, contentCompFile) {
 }
 
 //hàm phân tích câu trả lời của ChatGPT và lấy ra con số tỷ lệ giống
-function getTheRateSimilar(theAnswerFromChatPGT) {
+export function getTheRateSimilar(theAnswerFromChatPGT) {
 	const targetChar = '%';
 	let rateSimilarFromChatGPT = '';
 	for (let i = 0; i < theAnswerFromChatPGT.length; i++) {
@@ -49,10 +49,4 @@ function getTheRateSimilar(theAnswerFromChatPGT) {
 	if (rateSimilarFromChatGPT === '') {
 		return -1;
 	}
-}
-
-export default {
-	callChatGPT,
-	makeTheQuestionForChatGPT,
-	getTheRateSimilar
 }

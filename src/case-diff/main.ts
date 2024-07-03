@@ -1,8 +1,8 @@
 import fs from 'fs';
 
 import callDiffUbuntu from './callDiff';
-import callChatGPT from './callChatGPT';
 import callDolos from './processDolosResult';
+import { makeTheQuestionForChatGPT, callChatGPT, getTheRateSimilar } from './callChatGPT.js'
 import { makeResult } from './processResult';
 import { executeDolos } from './runDolosFromLinux';
 
@@ -12,8 +12,9 @@ import { LANG_EXT_MAP } from '../inc/execution.js';
 /**
 * Kiểm tra các bài làm trong một bài thi
 * @param {Number} id ID của bài thi
+* @returns {Promise<Object>} Kết quả so sánh
 */
-export async function main(id: number): Promise<Object | null> {
+export default async function main(id: number): Promise<Object | null> {
 	// Lấy danh sách các câu hỏi
 	const quesion_idArr = await db.query("SELECT id, exercise_id FROM exam_cont WHERE exam_id = ?", [id]);
 
@@ -22,6 +23,10 @@ export async function main(id: number): Promise<Object | null> {
 		/**
 		* UUID các bài nộp mới nhất của tất cả sinh viên cho câu hỏi này
 		*/
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		///// TODO: điền nốt câu query  . Đại khái là
+		///// select * from submit where exam_cont_id = ? group by student_id ...
+		//////////////////////////////////////////////////////////////////////////////////////////////
 		const latestSubmissions: Array<any> = await db.query(" WHERE exam_cont_id = ?", [quesion_ID])
 
 		// Nếu ko có từ 2 bài trở lên thì thôi
@@ -112,9 +117,9 @@ export async function main(id: number): Promise<Object | null> {
 					// 2. SO SÁNH BẰNG CHATGPT
 					//////////////////////////
 
-					let theQuestionForChatGPT = callChatGPT.makeTheQuestionForChatGPT(contentBaseFile, contentCompFile);
-					let theAnswerFromChatPGT = await callChatGPT.callChatGPT(theQuestionForChatGPT);
-					let rateSimilarChatGPT = callChatGPT.getTheRateSimilar(theAnswerFromChatPGT);
+					let theQuestionForChatGPT = makeTheQuestionForChatGPT(contentBaseFile, contentCompFile);
+					let theAnswerFromChatPGT = await callChatGPT(theQuestionForChatGPT);
+					let rateSimilarChatGPT = getTheRateSimilar(theAnswerFromChatPGT);
 
 					objChatGPT.rateSimilar = parseFloat(rateSimilarChatGPT as string);
 
