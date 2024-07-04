@@ -167,6 +167,7 @@ export default async function main(id: number): Promise<void> {
 			}
 
 			changeNull(nameBaseFile, 1);
+			console.log("alo alo thuc hien so sanh thoi");
 		}
 	})
 }
