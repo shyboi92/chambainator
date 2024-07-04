@@ -21,10 +21,9 @@ export default function callDiff(pathFileCodeRoot: string, pathFileCodeCompare: 
     let result: string;
     try {
         result = execSync(`diff -iwB ${pathFileCodeRoot} ${pathFileCodeCompare}`, { encoding: "utf-8" });
-    } catch (e) {
+    } catch (e: any) {
         if (e.status == 1) {
-            // Status 1 means no difference found, so return an empty string
-            return "";
+            result = e.stdout.toString();
         } else {
             console.error(e);
             return null;
