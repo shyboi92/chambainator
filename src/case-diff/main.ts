@@ -16,7 +16,7 @@ import { LANG_EXT_MAP } from '../inc/execution.js';
 export default async function main(id: number): Promise<void> {
 	// Lấy danh sách các câu hỏi
 	const zut: Array<any> = await db.query("SELECT id, exercise_id FROM exam_cont WHERE exam_id = ?", [id]);
-	const questions: Array<number> = zut.map(z => z.exercise_id)
+	const questions: Array<number> = zut.map(z => z.id)
 
 	questions.forEach(async (questionId: number) => {
 
@@ -167,6 +167,7 @@ export default async function main(id: number): Promise<void> {
 			}
 
 			changeNull(nameBaseFile, 1);
+			console.log("alo alo thuc hien so sanh thoi");
 		}
 	})
 }

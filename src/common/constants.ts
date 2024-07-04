@@ -140,6 +140,11 @@ export const API_COURSE= {
 		method: 'get',
 		roles: HIGHER_ROLES
 	},
+	COURSE__USER__LIST: {
+		url: '/api/course/user_list',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
 	COURSE__GET: {
 		url: '/api/course/get',
 		method: 'get',
@@ -313,6 +318,11 @@ export const API_SUBMISSION = {
 	},
 	SUBMISSION__CHECK: {
 		url: '/api/submission/check',
+		method: 'get',
+		roles: HIGHER_ROLES
+	},
+	SUBMISSION__CHECK__HARD: {
+		url: '/api/submission/check_hard',
 		method: 'get',
 		roles: HIGHER_ROLES
 	},

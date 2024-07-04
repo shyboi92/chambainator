@@ -21,8 +21,6 @@ bindApiWithRoute(API_COURSE.COURSE__CREATE, api => apiRoute(router, api,
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
-		const isNormalUser = Roles.STUDENT == userInfo.role
 		if (!HIGHER_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
@@ -51,13 +49,11 @@ bindApiWithRoute(API_COURSE.COURSE__DELETE, api => apiRoute(router, api,
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
-		const isNormalUser = Roles.STUDENT == userInfo.role
-		if (notAdmin || isNormalUser)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN;
 
-		if (!notAdmin || (result == userInfo.id))	
-			await db.query("DELETE FROM course WHERE id = ?", [req.api.params.course_id])
+		if (notAdmin && userInfo.id != result )
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		else await db.query("DELETE FROM course WHERE id = ?", [req.api.params.course_id])
 
 		req.api.sendSuccess()
 	}
@@ -98,6 +94,10 @@ bindApiWithRoute(API_COURSE.COURSE__GET, api => apiRoute(router, api,
 bindApiWithRoute(API_COURSE.COURSE__LIST, api => apiRoute(router,api,
 	
 	async (req: ApiRequest, res: Response) => {
+			const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+			if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+				return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+			
 			const queryResult = await db.query("SELECT * FROM course")
 			const coursesArray = queryResult
 
@@ -105,4 +105,25 @@ bindApiWithRoute(API_COURSE.COURSE__LIST, api => apiRoute(router,api,
 	}
 ))
 
+bindApiWithRoute(API_COURSE.COURSE__USER__LIST, api => apiRoute( router, api,
+	apiValidatorParam(api, 'course_id').notEmpty().isInt().toInt(),
+	async (req: ApiRequest, res: Response) => {
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
+		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+
+		if ( !HIGHER_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+
+		const students = await db.query(`SELECT DISTINCT u.id AS user_id, u.username, u.fullname
+			FROM course c
+			JOIN class cl ON c.id = cl.course_id
+			JOIN student s ON cl.id = s.class_id
+			JOIN user u ON s.user_id = u.id
+			WHERE c.id = ? `, [req.api.params.course_id])
+
+		req.api.sendSuccess({ students: students })
+	}
+))

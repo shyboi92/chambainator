@@ -38,26 +38,19 @@ app.use(morgan(':remote-addr [:local-date] ":method :url HTTP/:http-version" :st
 app.use(morgan('dev'));
 
 
+app.use((req, res, next) => {
+	const origin = req.get('origin');
+	if (origin) {
+		res.setHeader('Access-Control-Allow-Origin', origin);
+		res.setHeader('Access-Control-Allow-Methods', '*');
+		res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+		res.setHeader('Access-Control-Allow-Credentials', 'true');
+	}
 
-// in dev mode, the front end may be served from another origin, then this is here to prevent the restriction
-if (process.env.NODE_ENV === 'development') {
-	console.log(chalk.yellow('CORS restriction is relaxed in development mode'));
-
-	app.use((req, res, next) => {
-		const origin = req.get('origin');
-		if (origin) {
-			res.setHeader('Access-Control-Allow-Origin', origin);
-			res.setHeader('Access-Control-Allow-Methods', '*');
-			res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-			res.setHeader('Access-Control-Allow-Credentials', 'true');
-		}
-
-		if (req.method.toUpperCase() === 'OPTIONS') {
-			res.sendStatus(httpCodes.OK);  // Only headers for preflight requests
-		} else next();      // Continue the process for other ones
-	});
-}
-
+	if (req.method.toUpperCase() === 'OPTIONS') {
+		res.sendStatus(httpCodes.OK);  // Only headers for preflight requests
+	} else next();      // Continue the process for other ones
+});
 
 
 app.use(cookieParser(config.SECRET_STRING));
