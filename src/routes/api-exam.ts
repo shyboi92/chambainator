@@ -55,6 +55,7 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 
 		// Thực hiện so sánh các bài làm khi tới thời điểm kết thúc của bài thi
 		const job = scheduleJob(endDate, () => {
+			console.log("Đang rà soát bài thi số", newExamId)
 			doDiff(newExamId).catch(e => console.error(e))
 		})
 	}
