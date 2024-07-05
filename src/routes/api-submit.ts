@@ -400,6 +400,9 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
 		}
 
+		// Kiểm tra chuỗi JSON trước khi parse
+		console.log(res[0].result);
+
 		// Parse the result JSON from the database
 		const checkResult = JSON.parse(res[0].result);
 
@@ -412,5 +415,6 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 		return req.api.sendSuccess({ question: questionresult, result: newResult });
 	}
 ));
+
 
 
