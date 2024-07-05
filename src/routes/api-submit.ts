@@ -367,68 +367,40 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__LIST, api => apiRoute( router, api,
 
 bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 
-    apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
-    apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'exercise_id').notEmpty().isInt().toInt(),
 
-    async (req: ApiRequest) => {
-        const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+	async (req: ApiRequest) => {
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
-        // Truy vấn để lấy teacher_id
-        const r = await db.query("SELECT c.teacher_id FROM class c JOIN exam e ON c.id = e.class_id WHERE e.id = ?", [req.api.params.exam_id]);
-        if (r == null || r.length == 0) {
-            return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Không tìm thấy thông tin lớp học");
-        }
-        const result = r[0]['teacher_id'];
+		// Truy vấn để lấy teacher_id
+		const r = await db.query("SELECT c.teacher_id FROM class c JOIN exam e ON c.id = e.class_id WHERE e.id = ?", [req.api.params.exam_id]);
+		if (r == null || r.length == 0) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Không tìm thấy thông tin lớp học");
+		}
+		const result = r[0]['teacher_id'];
 
-        // Truy vấn để lấy question_id
-        const questionquery = await db.query("SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?", [req.api.params.exam_id, req.api.params.exercise_id]);
-        if (questionquery == null || questionquery.length == 0) {
-            return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Không tìm thấy câu hỏi");
-        }
-        const questionresult = questionquery[0]['id'];
+		// Truy vấn để lấy question_id
+		const questionquery = await db.query("SELECT id FROM exam_cont WHERE exam_id = ? AND exercise_id = ?", [req.api.params.exam_id, req.api.params.exercise_id]);
+		if (questionquery == null || questionquery.length == 0) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Không tìm thấy câu hỏi");
+		}
+		const questionresult = questionquery[0]['id'];
 
-        // Kiểm tra quyền truy cập
-        if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-            return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// Kiểm tra quyền truy cập
+		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-        if (result != userInfo.id && ![Roles.SYSTEM_ADMIN].includes(userInfo.role))
-            return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		if (result != userInfo.id && ![Roles.SYSTEM_ADMIN].includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-        // Truy vấn để lấy thông tin kiểm tra
-        const res = await db.query("SELECT id, sub_id1, sub_id2, result FROM check_sub WHERE question_id = ?", [questionresult]);
-        if (res == null || res.length == 0) {
-            return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
-        }
+		// Truy vấn để lấy thông tin kiểm tra
+		const res = await db.query("SELECT result FROM check_sub WHERE question_id = ?", [questionresult]);
+		if (res == null || res.length == 0) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
+		}
 
-        // Get the sub_id1 and sub_id2 from the first result entry
-        const sub_id1 = res[0].sub_id1;
-        const sub_id2 = res[0].sub_id2;
-
-        // Transform the result into the desired format
-        const formattedResult = {
-            Result1: {},
-            submissionId: {
-                0: {
-                    nameFile1: sub_id1,
-                    nameFile2: sub_id2
-                }
-            }
-        };
-
-        res.forEach((entry, index) => {
-            if (Array.isArray(entry.result)) {
-                entry.result.forEach((item, idx) => {
-                    formattedResult.Result1[idx + 1] = {
-                        rateSimilar: item.rateSimilar,
-                        comparisonMethod: item.comparisonMethod,
-                        contentSimilarFile1: item.contentSimilarFile1,
-                        contentSimilarFile2: item.contentSimilarFile2
-                    };
-                });
-            }
-        });
-
-        return req.api.sendSuccess({ question: questionresult, sub_id1, sub_id2, Result: formattedResult });
-    }
+		return req.api.sendSuccess({ question: questionresult, list_check: res });
+	}
 ));
 
