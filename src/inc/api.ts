@@ -83,11 +83,11 @@ export function apiRoute(router: Router, api: WebApi, ...handlers: (RequestHandl
 		if (api.method.toUpperCase() !== req.method) return res.sendStatus(httpCodes.NOT_FOUND);
 
 		// checks role
-		// if (!api.roles.includes(Roles.UNAUTHENTICATED)) {
-		// 	const user = await req.ctx.getUser();
-		// 	if (!user) return req.api.sendError(ErrorCodes.USER_NOT_LOGGED_IN, 'Bạn cần đăng nhập để thực hiện tác vụ này.');
-		// 	if (!(await user.hasApiPermission(api))) return req.api.sendError(ErrorCodes.NO_PERMISSION, 'Bạn không có quyền thực hiện tác vụ này.');
-		// }
+		if (!api.roles.includes(Roles.UNAUTHENTICATED)) {
+			const user = await req.ctx.getUser();
+			if (!user) return req.api.sendError(ErrorCodes.USER_NOT_LOGGED_IN, 'Bạn cần đăng nhập để thực hiện tác vụ này.');
+			if (!(await user.hasApiPermission(api))) return req.api.sendError(ErrorCodes.NO_PERMISSION, 'Bạn không có quyền thực hiện tác vụ này.');
+		}
 
 		next();
 	}
