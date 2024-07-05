@@ -99,27 +99,33 @@ export class RequestContext {
 	}
 
 
-	/**
-	 * Checks for authorization by remembered JWT token.
-	 * Returns the user ID if successful, or `null` otherwise.
-	 */
 	async loginWithRememberedToken(): Promise<number | null> {
 		const req = this.req as ParsedRequest;
-		const token = req.cookies?.[config.REMEMBER_LOGIN_COOKIE_NAME] ?? null;
-		if (!token) return null;
+		const authHeader = req.headers.authorization;
+		if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
 	
-		const data = jwt.verify(token, config.SECRET_STRING);
+		const token = authHeader.substring(7, authHeader.length); // Remove "Bearer " prefix
+	
+		let data;
+		try {
+			data = jwt.verify(token, config.SECRET_STRING);
+		} catch (err) {
+			console.log(`Token verification error: ${err}`);
+			return null;
+		}
+	
 		if (!data) return null;
-
+	
 		const info = await db.queryRow('select id, role from user where id = ? and enabled', [data.userId]);
 		if (!info) return null;
-
-		this.setUserId(info.id);
-
+	
+		await this.setUserId(info.id);
+	
 		db.query('update user set last_login_time = current_timestamp where id = ?', [info.id]);
-
+	
 		return data.userId;
 	}
+	
 
 
 	getUser(): User | null {
@@ -148,13 +154,13 @@ export class RequestContext {
  * Middleware that saves the request-response context information
  */
 export async function sessionContext(req: Request, res: Response, next: NextFunction) {
-	const ctx = new RequestContext(req, res);
+	const ctx = new RequestContext(req as ParsedRequest, res);
 	(req as ParsedRequest).ctx = ctx;
 
-	// login with remembered cookie token
+	// login with remembered token from Authorization header
 	if (!ctx.isAuthenticated()) {
 		const userId = await ctx.loginWithRememberedToken();
-		if (userId !== null) ctx.logActivity('Đăng nhập bằng nhớ tài khoản', {user_id: userId});
+		if (userId !== null) ctx.logActivity('Logged in with remembered token', { user_id: userId });
 	}
 
 	next();
