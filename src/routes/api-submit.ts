@@ -400,7 +400,17 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
 		}
 
-		return req.api.sendSuccess({ question: questionresult, list_check: res });
+		// Parse the result JSON from the database
+		const checkResult = JSON.parse(res[0].result);
+
+		// Construct the new response format
+		const newResult = {
+			submissionId: checkResult[0],
+			checkRateduplicate: checkResult.slice(1)
+		};
+
+		return req.api.sendSuccess({ question: questionresult, result: newResult });
 	}
 ));
+
 
