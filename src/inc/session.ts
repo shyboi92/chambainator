@@ -94,7 +94,7 @@ export class RequestContext {
 
 		return {
 			id: info.id,
-			cookie: [config.REMEMBER_LOGIN_COOKIE_NAME, token]
+			token
 		}
 	}
 

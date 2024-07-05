@@ -34,7 +34,7 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 	
 			return req.api.sendSuccess({
 				user_info: userInfo,
-				cookie: ret.cookie
+				token: ret.token
 			});
 		}
 
