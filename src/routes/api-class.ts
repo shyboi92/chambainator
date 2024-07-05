@@ -152,7 +152,9 @@ bindApiWithRoute(API_CLASS.CLASS__ADD__USER, api => apiRoute(router, api,
 	}
 ))
 
-bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api, apiValidatorParam(api, 'student_id').notEmpty().isInt().toInt(), 
+bindApiWithRoute(API_CLASS.CLASS__DELETE__USER, api => apiRoute(router, api, 
+	apiValidatorParam(api, 'user_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 
 async (req: ApiRequest, res: Response) => {
     try {
@@ -161,7 +163,13 @@ async (req: ApiRequest, res: Response) => {
             return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'User information not found');
         }
 
-        const r = await db.query("SELECT class.teacher_id FROM student INNER JOIN class ON student.class_id = class.id WHERE student.id = ?", [req.api.params.student_id]);
+		const querystudent = await db.query("SELECT id FROM student WHERE user_id = ? AND class_id = ?",[req.api.params.user_id,req.api.params.class_id]);
+		// Kiểm tra nếu truy vấn trả về rỗng
+        if (!querystudent || querystudent.length === 0) {
+            return req.api.sendError(ErrorCodes.NOT_FOUND, 'Student not found for the given user ID and class ID');
+        }
+		const studentid = querystudent[0]['id']
+        const r = await db.query("SELECT class.teacher_id FROM student INNER JOIN class ON student.class_id = class.id WHERE student.id = ?", [studentid]);
         
         if (!r || r.length === 0 || !r[0]) {
             return req.api.sendError(ErrorCodes.NOT_FOUND, 'Teacher not found for the given student ID');
@@ -177,9 +185,9 @@ async (req: ApiRequest, res: Response) => {
             return req.api.sendError(ErrorCodes.NO_PERMISSION, 'User does not have permission');
         }
 
-        await db.query('DELETE FROM student WHERE id = ?', [req.api.params.student_id]);
+        await db.query('DELETE FROM student WHERE id = ?', [studentid]);
 
-        req.ctx.logActivity('xoa trong lop hoc', { student_id: req.api.params.student_id });
+        req.ctx.logActivity('xoa trong lop hoc', { student_id: studentid });
         req.api.sendSuccess();
     } catch (error) {
         console.error('Error:', error);
