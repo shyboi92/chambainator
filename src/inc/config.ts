@@ -12,7 +12,7 @@ export const SECRET_STRING = process.env.SECRET_STRING ?? '3fddeabf-884b-4a0f-97
 export const SESSION_COOKIE_NAME = '1c874894-3e68-4afb-bb6b-f8870c537848';
 export const SESSION_MAX_AGE_SECONDS = 30 * 60;
 
-export const REMEMBER_LOGIN_COOKIE_NAME = 'lord-dankhonklonk';
+export const REMEMBER_LOGIN_COOKIE_NAME = '84b4075e-e957-44e3-9ff3-be394d1b84c6';
 export const REMEMBER_LOGIN_MAX_AGE_DAYS = 30;
 
 export const UNCATEGORIZED_TMP_FILES_MAX_AGE_DAYS = 3;
