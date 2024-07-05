@@ -400,20 +400,35 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
             return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
         }
 
-        // Combine the objects within the result array
-        const combinedResults = res.reduce((acc, curr) => {
-            if (Array.isArray(curr.result)) {
-                curr.result.forEach(item => {
-                    acc.push(item);
+        // Get the sub_id1 and sub_id2 from the first result entry
+        const sub_id1 = res[0].sub_id1;
+        const sub_id2 = res[0].sub_id2;
+
+        // Transform the result into the desired format
+        const formattedResult = {
+            Result1: {},
+            submissionId: {
+                0: {
+                    nameFile1: sub_id1,
+                    nameFile2: sub_id2
+                }
+            }
+        };
+
+        res.forEach((entry, index) => {
+            if (Array.isArray(entry.result)) {
+                entry.result.forEach((item, idx) => {
+                    formattedResult.Result1[idx + 1] = {
+                        rateSimilar: item.rateSimilar,
+                        comparisonMethod: item.comparisonMethod,
+                        contentSimilarFile1: item.contentSimilarFile1,
+                        contentSimilarFile2: item.contentSimilarFile2
+                    };
                 });
             }
-            return acc;
-        }, []);
+        });
 
-        // Convert the combinedResults array to JSON
-        const combinedJson = JSON.stringify(combinedResults);
-
-        return req.api.sendSuccess({ question: questionresult, combined_check: combinedJson });
+        return req.api.sendSuccess({ question: questionresult, sub_id1, sub_id2, Result: formattedResult });
     }
 ));
 
