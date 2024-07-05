@@ -96,8 +96,8 @@ bindApiWithRoute(API_COURSE.COURSE__LIST, api => apiRoute(router,api,
 	
 	async (req: ApiRequest, res: Response) => {
 			const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-			if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-				return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+			// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 			
 			const queryResult = await db.query("SELECT * FROM course")
 			const coursesArray = queryResult
@@ -110,7 +110,7 @@ bindApiWithRoute(API_COURSE.COURSE__USER__LIST, api => apiRoute( router, api,
 	apiValidatorParam(api, 'course_id').notEmpty().isInt().toInt(),
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
+		//const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
 		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
