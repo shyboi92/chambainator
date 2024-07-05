@@ -395,29 +395,12 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		// Truy vấn để lấy thông tin kiểm tra
-		const res = await db.query("SELECT result FROM check_sub WHERE question_id = ?", [questionresult]);
+		const res = await db.query("SELECT * FROM check_sub WHERE question_id = ?", [questionresult]);
 		if (res == null || res.length == 0) {
 			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
 		}
 
-		// Kiểm tra chuỗi JSON trước khi parse
-		console.log(res[0].result);
-
-		// Parse the result JSON from the database
-		let checkResult;
-		try {
-			checkResult = JSON.parse(res[0].result);
-		} catch (e) {
-			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Lỗi khi parse JSON");
-		}
-
-		// Construct the new response format
-		const newResult = {
-			submissionId: checkResult[0],
-			checkRateduplicate: checkResult.slice(1)
-		};
-
-		return req.api.sendSuccess({ question: questionresult, result: newResult });
+		return req.api.sendSuccess(res);
 	}
 ));
 
