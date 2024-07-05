@@ -11,4 +11,6 @@ export function addCheckSub(uuid1, uuid2, content, question_id) {
 		result: content,
 		question_id
 	})
+
+	console.log(`So sánh thành công hai bài làm ${uuid1} và ${uuid2}. Xem dữ liệu trong bảng kết quả so sánh.`);
 }

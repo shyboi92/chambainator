@@ -53,6 +53,8 @@ export default async function main(id: number): Promise<void> {
 			let checkComp = false;
 
 			for (let j = i + 1; j < latestSubmissions.length; j++) {
+				console.log(`Đang so sánh bài làm ${latestSubmissions[i].uuid} và ${latestSubmissions[j].uuid}...`);
+
 				// File so sánh cùng
 
 				const nameCompFile = latestSubmissions[j].uuid + '.' + LANG_EXT_MAP[latestSubmissions[j].language];
@@ -124,11 +126,11 @@ export default async function main(id: number): Promise<void> {
 					// 2. SO SÁNH BẰNG CHATGPT
 					//////////////////////////
 
-					let theQuestionForChatGPT = makeTheQuestionForChatGPT(contentBaseFile, contentCompFile);
-					let theAnswerFromChatPGT = await callChatGPT(theQuestionForChatGPT);
-					let rateSimilarChatGPT = getTheRateSimilar(theAnswerFromChatPGT);
+					// let theQuestionForChatGPT = makeTheQuestionForChatGPT(contentBaseFile, contentCompFile);
+					// let theAnswerFromChatPGT = await callChatGPT(theQuestionForChatGPT);
+					// let rateSimilarChatGPT = getTheRateSimilar(theAnswerFromChatPGT);
 
-					objChatGPT.rateSimilar = parseFloat(rateSimilarChatGPT as string);
+					// objChatGPT.rateSimilar = parseFloat(rateSimilarChatGPT as string);
 
 					////////////////////////
 					// 3. SO SÁNH BẰNG DOLOS
@@ -158,7 +160,8 @@ export default async function main(id: number): Promise<void> {
 					mang.push(objChatGPT);
 					mang.push(objDolos);
 
-					if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
+					// if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
+					if (objDiff.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
 						const resultJson = JSON.stringify(mang, replacer, 2).replace(/"\[(.*?)\]"/, "[$1]");
 
 						addCheckSub(latestSubmissions[i].uuid, latestSubmissions[j].uuid, resultJson, questionId);
@@ -167,7 +170,6 @@ export default async function main(id: number): Promise<void> {
 			}
 
 			changeNull(nameBaseFile, 1);
-			console.log("alo alo thuc hien so sanh thoi");
 		}
 	})
 }

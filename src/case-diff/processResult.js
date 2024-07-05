@@ -54,7 +54,8 @@ export function findRealStep(theAnswer, n) {
 export function makeStringResult(lineCode) {
 	let chuoiString = '';
 	let chuoiNumber = [];
-	let dau = cuoi = 1;
+	let dau = 1;
+	let cuoi = 1;
 	while (dau <= (lineCode.length - 1)) {
 		if (lineCode[dau] === true) {
 			for (let i = dau + 1; i <= (lineCode.length - 1); i++) {
