@@ -9,6 +9,8 @@ import fsRotator from 'file-stream-rotator';
 import moment from 'moment';
 import chalk from 'chalk';
 import httpCodes from 'http-status-codes';
+import cors from 'cors';
+
 
 import * as config from './config.js';
 import utils from './utils.js';
@@ -35,8 +37,8 @@ app.use(morgan(':remote-addr [:local-date] ":method :url HTTP/:http-version" :st
 		verbose: false
 	})
 }));
-app.use(morgan('dev'));
 
+app.use(morgan('dev'));
 
 app.use((req, res, next) => {
 	const origin = req.get('origin');
@@ -52,6 +54,7 @@ app.use((req, res, next) => {
 	} else next();      // Continue the process for other ones
 });
 
+app.use(cors())
 
 app.use(cookieParser(config.SECRET_STRING));
 
