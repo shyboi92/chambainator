@@ -5,7 +5,6 @@ import {Request, Response, NextFunction, CookieOptions} from 'express';
 import * as config from './config.js';
 import db from './database.js';
 import { WebApi, Roles, CourseInfo, UserInfo } from './constants.js';
-import { token } from 'morgan';
 
 
 
@@ -79,21 +78,19 @@ export class RequestContext {
 
 		db.query('update user set last_login_time = current_timestamp where id = ?', [info.id]);
 
-		if (rememberLogin) {	// generates JWT token and saves it in a cookie
-			const payload = {
-				userId: info.id
-			};
+		const payload = {
+			userId: info.id
+		};
 
-			const maxAgeSeconds = config.REMEMBER_LOGIN_MAX_AGE_DAYS * 24 * 3600;
-			const token = jwt.sign(payload, config.SECRET_STRING, {
-				expiresIn: maxAgeSeconds
-			});
+		const maxAgeSeconds = config.REMEMBER_LOGIN_MAX_AGE_DAYS * 24 * 3600;
+		const token: string = jwt.sign(payload, config.SECRET_STRING, {
+			expiresIn: maxAgeSeconds
+		});
 
-			this.res.cookie(config.REMEMBER_LOGIN_COOKIE_NAME, token, {
-				...getCookieOptions(),
-				maxAge: maxAgeSeconds * 1000,
-			});
-		}
+		this.res.cookie(config.REMEMBER_LOGIN_COOKIE_NAME, token, {
+			...getCookieOptions(),
+			maxAge: maxAgeSeconds * 1000,
+		});
 
 		return {
 			id: info.id,

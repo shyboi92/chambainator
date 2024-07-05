@@ -32,7 +32,7 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 	
 			req.ctx.logActivity('Đăng nhập bằng tài khoản', {user_id: userInfo.id});
 	
-			req.api.sendSuccess({
+			return req.api.sendSuccess({
 				user_info: userInfo,
 				cookie: ret.cookie
 			});
