@@ -65,7 +65,7 @@ export class RequestContext {
 	 * Returns the user ID if successful, or `null` otherwise.
 	 * If `rememberLogin` is `true`, generates a token and stores it in a cookie.
 	 */
-	async loginWithUsernameAndPassword(username: string, password: string, rememberLogin: boolean): Promise<number | null> {
+	async loginWithUsernameAndPassword(username: string, password: string, rememberLogin: boolean): Promise<any | null> {
 		const info = await db.queryRow('select id, password, role from user where username = ? and enabled', [username]);
 		if (!info) return null;
 
@@ -95,7 +95,10 @@ export class RequestContext {
 			});
 		}
 
-		return info.id;
+		return {
+			id: info.id,
+			cookie: [config.REMEMBER_LOGIN_COOKIE_NAME, token]
+		}
 	}
 
 

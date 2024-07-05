@@ -21,22 +21,24 @@ bindApiWithRoute(API.USER__LOGIN, api => apiRoute(router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		if (req.api.params.username) {
-			const userId = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
-			if (userId === null) return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
+			const ret = await req.ctx.loginWithUsernameAndPassword(req.api.params.username, req.api.params.password, req.api.params.remember_login);
+			const userId = ret.id;
+			if (userId === null)
+				return req.api.sendError(ErrorCodes.WRONG_USERNAME_OR_PASSWORD);
+			
+			const userInfo = await req.ctx.getUser()?.getClientInfo();
+			if (!userInfo)
+				return req.api.sendError(ErrorCodes.USER_NOT_LOGGED_IN);
+	
+			req.ctx.logActivity('Đăng nhập bằng tài khoản', {user_id: userInfo.id});
+	
+			req.api.sendSuccess({
+				user_info: userInfo,
+				cookie: ret.cookie
+			});
 		}
-		
-		const userInfo = await req.ctx.getUser()?.getClientInfo();
-		if (!userInfo) return req.api.sendError(ErrorCodes.USER_NOT_LOGGED_IN);
 
-		req.ctx.logActivity('Đăng nhập bằng tài khoản', {user_id: userInfo.id});
-
-		req.api.sendSuccess({
-			// Don't send the token to the client here, the client side does not need to get the token or to store it
-			// manually, as this is set into the cookie and sent back to the server automatically on every request.
-			// This is to avoid the token to be stolen.
-
-			user_info: userInfo
-		});
+		return req.api.sendError(ErrorCodes.INVALID_PARAMETERS)
 	}
 ))
 
