@@ -40,19 +40,19 @@ app.use(morgan(':remote-addr [:local-date] ":method :url HTTP/:http-version" :st
 
 app.use(morgan('dev'));
 
-app.use((req, res, next) => {
-	const origin = req.get('origin');
-	if (origin) {
-		res.setHeader('Access-Control-Allow-Origin', origin);
-		res.setHeader('Access-Control-Allow-Methods', '*');
-		res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-		res.setHeader('Access-Control-Allow-Credentials', 'true');
-	}
+// app.use((req, res, next) => {
+// 	const origin = req.get('origin');
+// 	if (origin) {
+// 		res.setHeader('Access-Control-Allow-Origin', origin);
+// 		res.setHeader('Access-Control-Allow-Methods', '*');
+// 		res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+// 		res.setHeader('Access-Control-Allow-Credentials', 'true');
+// 	}
 
-	if (req.method.toUpperCase() === 'OPTIONS') {
-		res.sendStatus(httpCodes.OK);  // Only headers for preflight requests
-	} else next();      // Continue the process for other ones
-});
+// 	if (req.method.toUpperCase() === 'OPTIONS') {
+// 		res.sendStatus(httpCodes.OK);  // Only headers for preflight requests
+// 	} else next();      // Continue the process for other ones
+// });
 
 app.use(cors())
 
