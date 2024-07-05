@@ -404,7 +404,12 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 		console.log(res[0].result);
 
 		// Parse the result JSON from the database
-		const checkResult = JSON.parse(res[0].result);
+		let checkResult;
+		try {
+			checkResult = JSON.parse(res[0].result);
+		} catch (e) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Lỗi khi parse JSON");
+		}
 
 		// Construct the new response format
 		const newResult = {
