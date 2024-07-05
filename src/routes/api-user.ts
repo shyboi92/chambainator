@@ -202,7 +202,7 @@ bindApiWithRoute(API.USER__GET, api => apiRoute(router, api,
             id: targetUserInfo.id,
 			username: targetUserInfo.username,
             fullname: targetUserInfo.fullname,
-			role: targetUserInfo.role,
+			role: 1,
 			enabled: targetUserInfo.enabled,
 			creation_time: targetUserInfo.creation_time,
 			last_login_time: targetUserInfo.last_login_time,
@@ -268,7 +268,7 @@ bindApiWithRoute(API.USER__LIST, api => apiRoute( router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
+		//const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
 		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
@@ -390,8 +390,8 @@ bindApiWithRoute(API.USER__DELETE, api => apiRoute(router, api,
 		const userInfo = await req.ctx.getUser()?.getClientInfo() as UserInfo;
 
 		//if (!AUTHENTICATED_ROLES.includes(userInfo.role)) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS)
-		const notAdmin = userInfo.role!= Roles.SYSTEM_ADMIN;
-		const isNormalUser = userInfo.role== Roles.STUDENT;
+		// const notAdmin = userInfo.role!= Roles.SYSTEM_ADMIN;
+		// const isNormalUser = userInfo.role== Roles.STUDENT;
 		//if (notAdmin || isNormalUser) return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		await db.query('DELETE FROM user WHERE id = ?',[req.api.params.user_id])
