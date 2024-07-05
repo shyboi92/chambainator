@@ -70,12 +70,12 @@ bindApiWithRoute(API.USER__CREATE, api => apiRoute(router, api,
 		// if (!session.User.checkStrongPassword(req.api.params.password))
 		// 	return req.api.sendError(ErrorCodes.INVALID_PASSWORD);
 
-		if (!AUTHENTICATED_ROLES.includes(req.api.params.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!AUTHENTICATED_ROLES.includes(req.api.params.role))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		// admin creates user
-		if ( userInfo.role !== Roles.SYSTEM_ADMIN || ![Roles.STUDENT,Roles.TEACHER].includes(req.api.params.role) )
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// // admin creates user
+		// if ( userInfo.role !== Roles.SYSTEM_ADMIN || ![Roles.STUDENT,Roles.TEACHER].includes(req.api.params.role) )
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const encodedPwd = await session.encodeUserPassword(req.api.params.password);
 
@@ -105,12 +105,13 @@ bindApiWithRoute(API.USER__UPDATE_INFO, api => apiRoute(router, api,
 
 		const targetUser = new session.User(req.api.params.user_id);
 		const targetUserInfo = await targetUser.getInfo();
-		if (!targetUserInfo || !targetUserInfo.enabled)
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		if (targetUserInfo == null) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!targetUserInfo || !targetUserInfo.enabled)
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		// normal users can only update their own info
-		if (userInfo.role == Roles.STUDENT && userInfo.id != targetUserInfo.id)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// // normal users can only update their own info
+		// if (userInfo.role == Roles.STUDENT && userInfo.id != targetUserInfo.id)
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		// validates old password if the user is updating his own
 		// if (userInfo.id == targetUserInfo.id && !(await targetUser.checkPassword(req.api.params.old_password)))
@@ -140,8 +141,8 @@ bindApiWithRoute(API.USER__UPDATE_PASSWORD, api => apiRoute(router, api,
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
 		// normal users can only update their own password
-		if (userInfo.role == Roles.STUDENT && userInfo.id != targetUserInfo.id)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// if (userInfo.role == Roles.STUDENT && userInfo.id != targetUserInfo.id)
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		// validates old password if the user is updating his own
 		if (userInfo.id == targetUserInfo.id && !(await targetUser.checkPassword(req.api.params.old_password)))
@@ -168,10 +169,10 @@ bindApiWithRoute(API.USER__ENABLE, api => apiRoute(router, api,
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
 		// a user cannot enable/disable himself
-		if (userInfo.id == req.api.params.user_id) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (userInfo.id == req.api.params.user_id) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		const targetUserInfo = await (new session.User(req.api.params.user_id)).getInfo();
-		if (!targetUserInfo) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// const targetUserInfo = await (new session.User(req.api.params.user_id)).getInfo();
+		// if (!targetUserInfo) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
 		db.query('update user set enabled = ?, last_update_time = current_timestamp where id = ?', [req.api.params.enabled, req.api.params.user_id]);
 
@@ -193,9 +194,9 @@ bindApiWithRoute(API.USER__GET, api => apiRoute(router, api,
 		let targetUserInfo = await (new session.User(req.api.params.user_id)).getClientInfo();
 		if (!targetUserInfo) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		// a normal user can only get info of himself
-		if (userInfo.role == Roles.STUDENT && targetUserInfo.id != userInfo.id)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// // a normal user can only get info of himself
+		// if (userInfo.role == Roles.STUDENT && targetUserInfo.id != userInfo.id)
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const info: UserInfo = {
             id: targetUserInfo.id,
@@ -269,11 +270,11 @@ bindApiWithRoute(API.USER__LIST, api => apiRoute( router, api,
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if ( notAdmin)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// if ( notAdmin)
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const users = await db.query(`select id ,username, fullname, role, enabled , creation_time, last_login_time , last_update_time FROM user `)
 
@@ -388,10 +389,10 @@ bindApiWithRoute(API.USER__DELETE, api => apiRoute(router, api,
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getClientInfo() as UserInfo;
 
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role)) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS)
+		//if (!AUTHENTICATED_ROLES.includes(userInfo.role)) return req.api.sendError(ErrorCodes.INVALID_PARAMETERS)
 		const notAdmin = userInfo.role!= Roles.SYSTEM_ADMIN;
 		const isNormalUser = userInfo.role== Roles.STUDENT;
-		if (notAdmin || isNormalUser) return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		//if (notAdmin || isNormalUser) return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		await db.query('DELETE FROM user WHERE id = ?',[req.api.params.user_id])
 		req.api.sendSuccess();

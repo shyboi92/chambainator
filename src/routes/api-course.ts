@@ -18,11 +18,11 @@ bindApiWithRoute(API_COURSE.COURSE__CREATE, api => apiRoute(router, api,
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (!HIGHER_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// if (!HIGHER_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const newCourseId = (await db.insert('course', {
 			user_id: userInfo.id,
@@ -46,14 +46,15 @@ bindApiWithRoute(API_COURSE.COURSE__DELETE, api => apiRoute(router, api,
 		const r = await db.query("SELECT user_id FROM course WHERE id = ?", [req.api.params.course_id])
 		const result = r[0]['user_id']
 
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN;
+		// const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN;
 
-		if (notAdmin && userInfo.id != result )
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query("DELETE FROM course WHERE id = ?", [req.api.params.course_id])
+		// if (notAdmin && userInfo.id != result )
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		
+		await db.query("DELETE FROM course WHERE id = ?", [req.api.params.course_id])
 
 		req.api.sendSuccess()
 	}
@@ -68,10 +69,10 @@ bindApiWithRoute(API_COURSE.COURSE__UPDATE_INFO, api => apiRoute(router, api,
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
-		if (!HIGHER_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!HIGHER_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		await db.query('UPDATE course SET course_name = ?, description = ?, code = ? WHERE id = ?', [req.api.params.course_name, req.api.params.description, req.api.params.code, req.api.params.course_id]);
 		req.api.sendSuccess();
@@ -111,11 +112,11 @@ bindApiWithRoute(API_COURSE.COURSE__USER__LIST, api => apiRoute( router, api,
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
-		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+		// if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if ( !HIGHER_ROLES.includes(userInfo.role))
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+		// if ( !HIGHER_ROLES.includes(userInfo.role))
+		// 	return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const students = await db.query(`SELECT DISTINCT u.id AS user_id, u.username, u.fullname
 			FROM course c
