@@ -395,7 +395,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		// Truy vấn để lấy thông tin kiểm tra
-		const res = await db.query("SELECT * FROM check_sub WHERE question_id = ?", [questionresult]);
+		const res = await db.query("SELECT result FROM check_sub WHERE question_id = ?", [questionresult]);
 		if (res == null || res.length == 0) {
 			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
 		}
