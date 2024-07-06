@@ -65,8 +65,8 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute( router, api,
 bindApiWithRoute(API_CLASS.CLASS__UPDATE_INFO, api => apiRoute(router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'name').trim().notEmpty(),
-	apiValidatorParam(api, 'start_date').notEmpty().isISO8601().toDate(),
-	apiValidatorParam(api, 'end_date').notEmpty().isISO8601().toDate(),
+	apiValidatorParam(api, 'start_date').notEmpty().isDate().toDate(),
+	apiValidatorParam(api, 'end_date').notEmpty().isDate().toDate(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
@@ -78,7 +78,7 @@ bindApiWithRoute(API_CLASS.CLASS__UPDATE_INFO, api => apiRoute(router, api,
 
 		if (result!== userInfo.id && notAdmin)
 		return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('UPDATE class SET name = ? start_date = ? end_date = ? where id = ?', [req.api.params.name, req.api.params.start_date,req.api.params.end_date,req.api.params.class_id]);
+		else await db.query('UPDATE class SET name = ?, start_date = ?, end_date = ? where id = ?', [req.api.params.name, req.api.params.start_date,req.api.params.end_date,req.api.params.class_id]);
 
 		req.ctx.logActivity('Sửa thông tin lớp học', { user_id: req.api.params.class_id });
 		req.api.sendSuccess();
