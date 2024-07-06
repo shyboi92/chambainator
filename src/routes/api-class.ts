@@ -65,8 +65,8 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute( router, api,
 bindApiWithRoute(API_CLASS.CLASS__UPDATE_INFO, api => apiRoute(router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'name').trim().notEmpty(),
-	apiValidatorParam(api, 'start_date').notEmpty().isISO8601().toDate(),
-	apiValidatorParam(api, 'end_date').notEmpty().isISO8601().toDate(),
+	apiValidatorParam(api, 'start_date').notEmpty().isDate().toDate(),
+	apiValidatorParam(api, 'end_date').notEmpty().isDate().toDate(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
