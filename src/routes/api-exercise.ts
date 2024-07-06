@@ -79,7 +79,7 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__UPDATE_INFO, api => apiRoute(router, api
 
 		if ( notTeacher)
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query('UPDATE exercise SET name = ? description = ? where id = ?', [req.api.params.name, req.api.params.description,req.api.params.exercise_id]);
+		else await db.query('UPDATE exercise SET name = ?, description = ? where id = ?', [req.api.params.name, req.api.params.description,req.api.params.exercise_id]);
 
 		req.ctx.logActivity('Sửa thông tin bai tap', { exercise_id: req.api.params.exercise_id });
 		req.api.sendSuccess();
