@@ -269,13 +269,10 @@ bindApiWithRoute(API.USER__LIST, api => apiRoute( router, api,
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-		const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN)
 
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 
-		if (notAdmin)
-			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
 		const users = await db.query(`select id ,username, fullname, role, enabled , creation_time, last_login_time , last_update_time FROM user `)
 
