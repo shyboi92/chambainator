@@ -48,7 +48,7 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute(router, api,
 
     async (req: ApiRequest, res: Response) => {
         const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
-        const r = await db.query("SELECT teacher_id FROM class WHERE class.id = ?", [req.api.params.class_id]);
+        const r = await db.query("SELECT teacher_id FROM class WHERE id = ?", [req.api.params.class_id]);
         const result = r[0]['teacher_id'];
         const notAdmin = (userInfo.role !== Roles.SYSTEM_ADMIN);
 
@@ -63,7 +63,7 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute(router, api,
             DELETE cs FROM check_sub cs
             JOIN submission s1 ON cs.sub_id1 = s1.uuid
             JOIN submission s2 ON cs.sub_id2 = s2.uuid
-            JOIN exam_cont ec ON s1.exam_cont_id = ec.id
+            JOIN exam_cont ec ON s1.question = ec.id
             JOIN exam e ON ec.exam_id = e.id
             WHERE e.class_id = ?
         `, [req.api.params.class_id]);
@@ -71,7 +71,7 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute(router, api,
         // Xóa các bản ghi liên quan trong bảng `submission`
         await db.query(`
             DELETE s FROM submission s
-            JOIN exam_cont ec ON s.exam_cont_id = ec.id
+            JOIN exam_cont ec ON s.question = ec.id
             JOIN exam e ON ec.exam_id = e.id
             WHERE e.class_id = ?
         `, [req.api.params.class_id]);
