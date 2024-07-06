@@ -81,7 +81,7 @@ export const API = {
 	USER__LIST: {
 		url: '/api/user/list',
 		method: 'get',
-		roles: [Roles.SYSTEM_ADMIN]
+		roles: AUTHENTICATED_ROLES
 	},
 	USER__GET: {
 		url: '/api/user/get',
@@ -138,7 +138,7 @@ export const API_COURSE= {
 	COURSE__LIST: {
 		url: '/api/course/list',
 		method: 'get',
-		roles: HIGHER_ROLES
+		roles: AUTHENTICATED_ROLES
 	},
 	COURSE__USER__LIST: {
 		url: '/api/course/user_list',
