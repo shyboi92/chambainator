@@ -56,6 +56,19 @@ bindApiWithRoute(API_EXERCISE.EXERCISE__DELETE, api => apiRoute( router, api,
 		if ( notTeacher)
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 		
+		await db.query(`
+            DELETE cs FROM check_sub cs
+            JOIN submission s1 ON cs.sub_id1 = s1.uuid
+            JOIN submission s2 ON cs.sub_id2 = s2.uuid
+            JOIN exam_cont ec ON s1.question_id = ec.id
+            WHERE ec.exercise_id = ?
+        `, [req.api.params.exercise_id]);
+
+        await db.query(`
+            DELETE s FROM submission s
+            JOIN exam_cont ec ON s.question_id = ec.id
+            WHERE ec.exercise_id = ?
+        `, [req.api.params.exam_id]);
 		await db.query("DELETE FROM exam_cont WHERE exercise_id = ?", [req.api.params.exercise_id]);
 		await db.query("DELETE FROM test_case WHERE exercise_id = ?", [req.api.params.exercise_id]);
 		await db.query("DELETE FROM exercise WHERE id = ?", [req.api.params.exercise_id]);

@@ -201,7 +201,7 @@ async (req: ApiRequest, res: Response) => {
         const r = await db.query("SELECT class.teacher_id FROM student INNER JOIN class ON student.class_id = class.id WHERE student.id = ?", [studentid]);
         
         if (!r || r.length === 0 || !r[0]) {
-            return req.api.sendError(ErrorCodes.NOT_FOUND, 'Teacher not found for the given student ID');
+            return req.api.sendError(ErrorCodes.NOT_FOUND, 'Teacher not found for the given ');
         }
         
         const result = r[0]['teacher_id'];
@@ -214,6 +214,14 @@ async (req: ApiRequest, res: Response) => {
             return req.api.sendError(ErrorCodes.NO_PERMISSION, 'User does not have permission');
         }
 
+		await db.query(`
+            DELETE cs FROM check_sub cs
+            JOIN submission s1 ON cs.sub_id1 = s1.uuid
+            JOIN submission s2 ON cs.sub_id2 = s2.uuid
+            WHERE s1.student_id = ?
+        `, [studentid]);
+		
+		await db.query('DELETE FROM submission WHERE student_id = ?', [studentid]);
         await db.query('DELETE FROM student WHERE id = ?', [studentid]);
 
         req.ctx.logActivity('xoa trong lop hoc', { student_id: studentid });
