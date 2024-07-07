@@ -58,38 +58,32 @@ bindApiWithRoute(API_CLASS.CLASS__DELETE, api => apiRoute(router, api,
         if (result !== userInfo.id && notAdmin)
             return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-        // Xóa các bản ghi liên quan trong bảng `check_sub`
         await db.query(`
             DELETE cs FROM check_sub cs
             JOIN submission s1 ON cs.sub_id1 = s1.uuid
             JOIN submission s2 ON cs.sub_id2 = s2.uuid
-            JOIN exam_cont ec ON s1.question = ec.id
+            JOIN exam_cont ec ON s1.question_id = ec.id
             JOIN exam e ON ec.exam_id = e.id
             WHERE e.class_id = ?
         `, [req.api.params.class_id]);
 
-        // Xóa các bản ghi liên quan trong bảng `submission`
         await db.query(`
             DELETE s FROM submission s
-            JOIN exam_cont ec ON s.question = ec.id
+            JOIN exam_cont ec ON s.question_id = ec.id
             JOIN exam e ON ec.exam_id = e.id
             WHERE e.class_id = ?
         `, [req.api.params.class_id]);
 
-        // Xóa các bản ghi liên quan trong bảng `exam_cont`
         await db.query(`
             DELETE ec FROM exam_cont ec
             JOIN exam e ON ec.exam_id = e.id
             WHERE e.class_id = ?
         `, [req.api.params.class_id]);
 
-        // Xóa các bản ghi liên quan trong bảng `exam`
         await db.query("DELETE FROM exam WHERE class_id = ?", [req.api.params.class_id]);
 
-        // Xóa các bản ghi liên quan trong bảng `student`
         await db.query("DELETE FROM student WHERE class_id = ?", [req.api.params.class_id]);
 
-        // Cuối cùng, xóa bản ghi trong bảng `class`
         await db.query("DELETE FROM class WHERE id = ?", [req.api.params.class_id]);
 
         req.api.sendSuccess();

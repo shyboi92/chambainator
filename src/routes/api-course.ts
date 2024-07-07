@@ -53,9 +53,51 @@ bindApiWithRoute(API_COURSE.COURSE__DELETE, api => apiRoute(router, api,
 
 		if (notAdmin && userInfo.id != result )
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
-		else await db.query("DELETE FROM course WHERE id = ?", [req.api.params.course_id])
+		await db.query(`
+            DELETE cs FROM check_sub cs
+            JOIN submission s1 ON cs.sub_id1 = s1.uuid
+            JOIN submission s2 ON cs.sub_id2 = s2.uuid
+            JOIN exam_cont ec ON s1.question_id = ec.id
+            JOIN exam e ON ec.exam_id = e.id
+			JOIN class cl ON e.class_id = cl.id
+            WHERE cl.course_id = ?
+        `, [req.api.params.course_id]);
 
-		req.api.sendSuccess()
+        await db.query(`
+            DELETE s FROM submission s
+            JOIN exam_cont ec ON s.question_id = ec.id
+            JOIN exam e ON ec.exam_id = e.id
+			JOIN class cl ON e.class_id = cl.id
+            WHERE cl.course_id = ?
+        `, [req.api.params.course_id]);
+
+        await db.query(`
+            DELETE ec FROM exam_cont ec
+            JOIN exam e ON ec.exam_id = e.id
+			JOIN class cl ON e.class_id = cl.id
+            WHERE cl.course_id = ?
+        `, [req.api.params.course_id]);
+
+		await db.query(`
+            DELETE e FROM exam e
+			JOIN class cl ON e.class_id = cl.id
+            WHERE cl.course_id = ?
+        `, [req.api.params.course_id]);
+
+		await db.query(`
+            DELETE tc FROM test_case tc
+            JOIN exercise e ON tc.exercise_id = e.id
+            WHERE e.course_id = ?
+        `, [req.api.params.course_id]);
+
+        await db.query("DELETE FROM exercise WHERE course_id = ?", [req.api.params.course_id]);
+
+        await db.query("DELETE FROM class WHERE course_id = ?", [req.api.params.course_id]);
+
+        await db.query("DELETE FROM course WHERE id = ?", [req.api.params.course_id]);
+
+        req.api.sendSuccess();
+
 	}
 ))
 
