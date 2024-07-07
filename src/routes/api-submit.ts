@@ -116,8 +116,12 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE__BYTEXT, api => apiRoute(rout
 
 		//#region Lưu thông tin ban đầu của bài làm vào CSDL
 		const NEW_SUBMISSION_UUID = randomUUID()
-		const isoDate = new Date().toISOString().slice(0, 19).replace('T', ' ')
+		const submitDate = new Date();
+		const isoDate = submitDate.toISOString().slice(0, 19).replace('T', ' ')
 
+		const endtimequery = await db.query("SELECT end_date FROM exam WHERE id = ?",[req.api.params.exam_id]);
+		const endtimeresult = new Date(endtimequery[0]['end_date']);
+		if (submitDate > endtimeresult) return req.api.sendError(ErrorCodes.INTERNAL_ERROR, 'quá hạn nộp bài rồi bn ơi');
 		try {
 			await db.insert('submission', {
 				uuid: NEW_SUBMISSION_UUID,
@@ -228,12 +232,17 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 
 		//#region Lưu thông tin ban đầu của bài làm vào CSDL
 		const NEW_SUBMISSION_UUID = randomUUID()
+		const submitDate = new Date();
+		const isoDate = submitDate.toISOString().slice(0, 19).replace('T', ' ')
 
+		const endtimequery = await db.query("SELECT end_date FROM exam WHERE id = ?",[req.api.params.exam_id]);
+		const endtimeresult = new Date(endtimequery[0]['end_date']);
+		if (submitDate > endtimeresult) return req.api.sendError(ErrorCodes.INTERNAL_ERROR, 'quá hạn nộp bài rồi bn ơi');
 		try {
 			await db.insert('submission', {
 				uuid: NEW_SUBMISSION_UUID,
 				student_id: targetStudentId,
-				date_time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+				date_time: isoDate,
 				// exercise_id: req.api.params.exercise_id,
 				question_id: targetQuestionId,
 				description: req.api.params.description || null,
