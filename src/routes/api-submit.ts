@@ -287,8 +287,21 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__GET, api => apiRoute( router, api,
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
 			return req.api.sendError(ErrorCodes.NO_PERMISSION);
 
-		const res = await db.query("SELECT * FROM submission WHERE uuid = ?", [req.api.params.submission_id])
-		return req.api.sendSuccess( res[0])
+		const querystudentexam = await db.query("SELECT student_id, question_id FROM submission WHERE uuid = ?",[req.api.params.submission_id]);
+		const resultquerystudent = querystudentexam[0]['student_id'];
+		const resultqueryexamcont = querystudentexam[0]['question_id'];
+		const student = await db.query("SELECT user_id FROM student WHERE id = ?",[resultquerystudent]) ;
+		const userId = student[0]['user_id'];
+		const examcont = await db.query("SELECT exam_id, exercise_id FROM exam_cont WHERE id = ?",[resultqueryexamcont]);
+		const exam_id = examcont[0]['exam_id'];
+		const exercise_id = examcont[0]['exercise_id'];
+		const res = await db.query("SELECT date_time, score, description, name, language FROM submission WHERE uuid = ?", [req.api.params.submission_id])
+		return req.api.sendSuccess( {
+			result: res[0],
+			exam_id: exam_id,
+			exercise_id: exercise_id,
+			user_id: userId
+		})
 	}
 ))
 
