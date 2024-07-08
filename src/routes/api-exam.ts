@@ -102,8 +102,8 @@ bindApiWithRoute(API_EXAM.EXAM__UPDATE_INFO, api => apiRoute(router, api,
 	apiValidatorParam(api, 'exam_id').notEmpty().isInt().toInt(),
 	apiValidatorParam(api, 'name').trim().optional(),
 	apiValidatorParam(api, 'description').trim().optional(),
-	apiValidatorParam(api, 'start_date').optional().isDate().toDate(),
-	apiValidatorParam(api, 'end_date').optional().isDate().toDate(),
+	apiValidatorParam(api, 'start_date').optional().isISO8601().toDate(),
+	apiValidatorParam(api, 'end_date').optional().isISO8601().toDate(),
 	apiValidatorParam(api, 'questions').isArray().toArray().optional(),
 
 	async (req: ApiRequest, res: Response) => {

@@ -234,9 +234,11 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 		const NEW_SUBMISSION_UUID = randomUUID()
 		const submitDate = new Date();
 		const isoDate = submitDate.toISOString().slice(0, 19).replace('T', ' ')
-
+		console.log("ngay nop bai", submitDate);
 		const endtimequery = await db.query("SELECT end_date FROM exam WHERE id = ?",[req.api.params.exam_id]);
 		const endtimeresult = new Date(endtimequery[0]['end_date']);
+		console.log("ngay het han", endtimeresult);
+		console.log("so sanh", submitDate > endtimeresult);
 		if (submitDate > endtimeresult) return req.api.sendError(ErrorCodes.INTERNAL_ERROR, 'quá hạn nộp bài rồi bn ơi');
 		try {
 			await db.insert('submission', {
