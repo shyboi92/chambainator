@@ -116,7 +116,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE__BYTEXT, api => apiRoute(rout
 
 		//#region Lưu thông tin ban đầu của bài làm vào CSDL
 		const NEW_SUBMISSION_UUID = randomUUID()
-		const submitDate = new Date();
+		const now = new Date();
+		const submitDate = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
 		const isoDate = submitDate.toISOString().slice(0, 19).replace('T', ' ')
 
 		const endtimequery = await db.query("SELECT end_date FROM exam WHERE id = ?",[req.api.params.exam_id]);
@@ -232,7 +233,8 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CREATE, api => apiRoute(
 
 		//#region Lưu thông tin ban đầu của bài làm vào CSDL
 		const NEW_SUBMISSION_UUID = randomUUID()
-		const submitDate = new Date();
+		const now = new Date();
+		const submitDate = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
 		const isoDate = submitDate.toISOString().slice(0, 19).replace('T', ' ')
 		console.log("ngay nop bai", submitDate);
 		const endtimequery = await db.query("SELECT end_date FROM exam WHERE id = ?",[req.api.params.exam_id]);
