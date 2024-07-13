@@ -87,11 +87,6 @@ export class RequestContext {
 			expiresIn: maxAgeSeconds
 		});
 
-		this.res.cookie(config.REMEMBER_LOGIN_COOKIE_NAME, token, {
-			...getCookieOptions(),
-			maxAge: maxAgeSeconds * 1000,
-		});
-
 		return {
 			id: info.id,
 			token

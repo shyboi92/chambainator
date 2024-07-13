@@ -127,9 +127,10 @@ export async function evaluateSubmission({ uuid, path: sourceFilePath, lang }: S
 
 	// Tính điểm: Lấy thang điểm 10, chia cho tổng số case rồi nhân với số case đạt
 	const MAX_SCORE = 10
-	const SCORE = MAX_SCORE / TEST_CASES.length * Object.values(TEST_RESULT).filter(Boolean).length
+	var SCORE = MAX_SCORE / TEST_CASES.length * Object.values(TEST_RESULT).filter(Boolean).length
 
 	// Cập nhật kết quả chạy trong CSDL
+	if (isNaN(SCORE)) SCORE = 0;
 	await db.query("UPDATE submission SET score = ? WHERE uuid = ?", [SCORE, uuid])
 	console.info(`Đã cập nhật điểm của bài làm ${uuid}, bài đạt ${SCORE}/${MAX_SCORE} điểm`)
 	//#endregion
