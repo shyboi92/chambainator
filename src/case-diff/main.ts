@@ -160,8 +160,8 @@ export default async function main(id: number): Promise<void> {
 					mang.push(objChatGPT);
 					mang.push(objDolos);
 
-					// if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
-					if (objDiff.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
+					 if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar! > 0 || objDolos.rateSimilar! > 0) {
+					//if (objDiff.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
 						const resultJson = JSON.stringify(mang, replacer, 2).replace(/"\[(.*?)\]"/, "[$1]");
 
 						addCheckSub(latestSubmissions[i].uuid, latestSubmissions[j].uuid, resultJson, questionId);
