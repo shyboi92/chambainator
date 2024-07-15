@@ -91,21 +91,21 @@ AND
 					mang.push(obj0);
 
 					let objDiff = {
-						comparisonMethod: 'diff',
+						comparisonMethod: 'DIFF (LINUX)',
 						rateSimilar: null as number | null,
 						contentSimilarFile1: null as any,
 						contentSimilarFile2: null as any,
 					};
 
 					let objDolos = {
-						comparisonMethod: 'dolos',
+						comparisonMethod: 'Dolos-lib',
 						rateSimilar: null as number | null,
 						contentSimilarFile1: null as any,
 						contentSimilarFile2: null as any,
 					};
 
 					let objChatGPT = {
-						comparisonMethod: 'chatgpt',
+						comparisonMethod: 'ChatGPT',
 						rateSimilar: null as number | null,
 						contentSimilarFile1: null as string | null,
 						contentSimilarFile2: null as string | null,
