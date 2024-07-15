@@ -25,18 +25,28 @@ export default async function main(id: number): Promise<void> {
 		*/
 		const latestSubmissions: Array<any> = await db.query(
 			`SELECT
-				s1.*
-			FROM submission s1
-			JOIN (
-				SELECT
-					student_id,
-					MAX(date_time) AS latest_date_time
-				FROM submission
-				WHERE question_id = ?
-				GROUP BY student_id
-			) s2
-				ON s1.student_id = s2.student_id AND s1.date_time = s2.latest_date_time
-			WHERE s1.question_id = ?`,
+    s1.*
+FROM
+    submission s1
+JOIN (
+    SELECT
+        student_id,
+        MAX(date_time) AS latest_date_time
+    FROM
+        submission
+    WHERE
+        question_id = 100
+    GROUP BY
+        student_id
+) s2 ON s1.student_id = s2.student_id AND s1.date_time = s2.latest_date_time
+WHERE
+    s1.question_id = 100
+AND
+    s1.uuid = (
+        SELECT MIN(uuid)
+        FROM submission
+        WHERE student_id = s1.student_id AND date_time = s1.date_time AND question_id = s1.question_id
+    )`,
 			[questionId, questionId]
 		)
 
@@ -126,11 +136,11 @@ export default async function main(id: number): Promise<void> {
 					// 2. SO SÁNH BẰNG CHATGPT
 					//////////////////////////
 
-					// let theQuestionForChatGPT = makeTheQuestionForChatGPT(contentBaseFile, contentCompFile);
-					// let theAnswerFromChatPGT = await callChatGPT(theQuestionForChatGPT);
-					// let rateSimilarChatGPT = getTheRateSimilar(theAnswerFromChatPGT);
+					let theQuestionForChatGPT = makeTheQuestionForChatGPT(contentBaseFile, contentCompFile);
+					let theAnswerFromChatPGT = await callChatGPT(theQuestionForChatGPT);
+					let rateSimilarChatGPT = getTheRateSimilar(theAnswerFromChatPGT);
 
-					// objChatGPT.rateSimilar = parseFloat(rateSimilarChatGPT as string);
+					objChatGPT.rateSimilar = parseFloat(rateSimilarChatGPT as string);
 
 					////////////////////////
 					// 3. SO SÁNH BẰNG DOLOS
@@ -160,7 +170,7 @@ export default async function main(id: number): Promise<void> {
 					mang.push(objChatGPT);
 					mang.push(objDolos);
 
-					 if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar! > 0 || objDolos.rateSimilar! > 0) {
+					 if (objDiff.rateSimilar > 0 || objChatGPT.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
 					//if (objDiff.rateSimilar > 0 || objDolos.rateSimilar! > 0) {
 						const resultJson = JSON.stringify(mang, replacer, 2).replace(/"\[(.*?)\]"/, "[$1]");
 
