@@ -35,12 +35,12 @@ JOIN (
     FROM
         submission
     WHERE
-        question_id = 100
+        question_id = ?
     GROUP BY
         student_id
 ) s2 ON s1.student_id = s2.student_id AND s1.date_time = s2.latest_date_time
 WHERE
-    s1.question_id = 100
+    s1.question_id = ?
 AND
     s1.uuid = (
         SELECT MIN(uuid)
