@@ -172,6 +172,11 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 			const queryclass = await db.query("SELECT class_id FROM exam WHERE id = ?", [req.api.params.exam_id]);
 			const classId = queryclass[0]['class_id'];
 			const querystudent = await db.query("SELECT id FROM student WHERE user_id = ? AND class_id = ?", [userInfo.id, classId]);
+
+			console.log("exam qq", req.api.params.exam_id);
+			console.log("useinfoid", userInfo.id);
+			console.log("class_id la ", classId);
+			
 			const studentId = querystudent[0]['id'];
 
 			const examconIds = examData.map(row => row.id);
