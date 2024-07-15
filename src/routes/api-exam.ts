@@ -58,6 +58,7 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 			console.log("Đang rà soát bài thi số", newExamId)
 			doDiff(newExamId).catch(e => console.error(e))
 		})
+		console.log("After scheduling job, job details:", job);
 	}
 ))
 
