@@ -422,7 +422,7 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 		// Truy vấn để lấy thông tin kiểm tra
 		const res = await db.query("SELECT result FROM check_sub WHERE question_id = ?", [questionresult]);
 		if (res == null || res.length == 0) {
-			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra");
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, "Chưa hết hạn kiểm tra hoặc kiểm tra trùng lặp chưa chạy");
 		}
 
 		return req.api.sendSuccess(res);
