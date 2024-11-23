@@ -9,6 +9,8 @@ import doDiff from '../case-diff/main.js'
 const router = Router();
 export default router;
 
+type MultipleChoiceAnswer = 'A' | 'B' | 'C' | 'D'
+
 
 bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
@@ -36,7 +38,8 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 			name: req.api.params.name,
 			description: req.api.params.description,
 			start_date: startDate,
-			end_date: endDate
+			end_date: endDate,
+			on_paper: false
 		}))?.insertId;
 
 		if (!newExamId)
@@ -59,6 +62,53 @@ bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 			doDiff(newExamId).catch(e => console.error(e))
 		})
 		console.log("After scheduling job, job details:", job);
+	}
+))
+
+bindApiWithRoute(API_EXAM.EXAM_PAPER_CREATE, api => apiRoute(router, api,
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'name').trim().optional(),
+	apiValidatorParam(api, 'description').trim().optional(),
+	apiValidatorParam(api, 'start_date').notEmpty().isISO8601().toDate(),
+	apiValidatorParam(api, 'end_date').notEmpty().isISO8601().toDate(),
+	apiValidatorParam(api, 'answers').isArray().toArray(),
+
+	async (req: ApiRequest, res: Response) => {
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+		const queryResult = await db.query("SELECT teacher_id FROM class WHERE id = ?", [req.api.params.class_id])
+		const creatorId = queryResult[0]['teacher_id']
+
+		const notAdmin = userInfo.role != Roles.SYSTEM_ADMIN
+
+		if (notAdmin && (userInfo.id != creatorId))
+			return req.api.sendError(ErrorCodes.NO_PERMISSION);
+
+		const startDate = req.api.params.start_date
+		const endDate = req.api.params.end_date
+
+		const newExamId = (await db.insert('exam', {
+			class_id: req.api.params.class_id,
+			name: req.api.params.name,
+			description: req.api.params.description,
+			start_date: startDate,
+			end_date: endDate,
+			on_paper: true
+		}))?.insertId;
+
+		if (!newExamId)
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR);
+
+		req.ctx.logActivity('Tạo bài thi trên giấy mới', { exam_id: newExamId });
+		req.api.sendSuccess({ exam_id: newExamId });
+
+		const questionIds = req.api.params.answers
+		questionIds.forEach((choice: MultipleChoiceAnswer, index: number) => {
+			db.insert('paper_test_answer', {
+				question_id: index,
+				exam_id: newExamId,
+				choice
+			})
+		});
 	}
 ))
 

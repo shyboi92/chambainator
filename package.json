@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@dodona/dolos": "^2.7.1",
+    "@types/express-fileupload": "^1.5.1",
     "@types/node-schedule": "^2.1.7",
     "archiver": "^6.0.1",
     "chalk": "^4.1.2",

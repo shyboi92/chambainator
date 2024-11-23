@@ -7,6 +7,8 @@ import {apiRoute, bindApiWithRoute, apiValidatorParam, ApiRequest} from '../inc/
 import path from 'path';
 import fs from 'fs';
 import { randomUUID } from 'crypto';
+import { UploadedFile } from 'express-fileupload';
+import { evaluate } from '../inc/paper-test.js';
 
 const router = Router();
 export default router;
@@ -430,4 +432,78 @@ bindApiWithRoute(API_SUBMISSION.SUBMISSION__CHECK, api => apiRoute(router, api,
 ));
 
 
+bindApiWithRoute(API_SUBMISSION.SUBMISSION_PAPER, api => apiRoute(router, api,
+	apiValidatorParam(api, 'exam_id').trim().notEmpty().isInt().toInt(),
+	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
+	
+	async (req: ApiRequest) => {
+		//#region Nhận file ảnh trắc nghiệm từ phía sinh viên gửi lên
+		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
+		let targetStudentId: Number
+		let examId: number = req.api.params.exam_id;
+
+		try {
+			const student_id = await db.query('SELECT id FROM student WHERE user_id = ? AND class_id = ?', [userInfo.id, req.api.params.class_id]);
+
+			//console.log('userid: ',userInfo.id, ' classid: ',req.api.params.class_id,' studentid: ', student_id);
+			if (student_id.length === 0) {
+				throw new Error('Không tìm thấy sinh viên với user_id với class_id đã cho.');
+			}
+
+			targetStudentId = student_id[0]['id'];
+		} catch (error) {
+			console.error(error.message);
+			return req.api.sendError(500)
+		}
+
+		if (!targetStudentId) {
+            return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Không tìm thấy sinh viên trong lớp.');
+        }
+
+		if (!AUTHENTICATED_ROLES.includes(userInfo.role))
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
+
+		const theFile: UploadedFile = req.files.test_paper
+		if (!theFile)
+			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS, 'Chưa gửi file bài làm trắc nghiệm.');
+
+		//#region Lưu thông tin ban đầu của bài làm vào CSDL
+		const NEW_SUBMISSION_UUID = randomUUID()
+		
+		const submitDate = new Date();
+		const isoDate = submitDate.toISOString().slice(0, 19).replace('T', ' ')
+		const endtimequery = await db.query("SELECT end_date FROM exam WHERE id = ?",[req.api.params.exam_id]);
+		const endtimeresult = new Date(endtimequery[0]['end_date']);
+		if (submitDate > endtimeresult) 
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR, 'quá hạn nộp bài rồi bn ơi');
+
+		try {
+			await db.insert('paper_submission', {
+				uuid: NEW_SUBMISSION_UUID,
+				student_id: targetStudentId,
+				date: isoDate,
+				exam_id: examId
+			})
+
+			console.info('Ghi nhận bài làm mới với UUID:', NEW_SUBMISSION_UUID)
+		} catch (e) {
+			return req.api.sendError(ErrorCodes.INTERNAL_ERROR);
+		}
+
+	   	req.ctx.logActivity('New paper submission', { submission_id: NEW_SUBMISSION_UUID });
+	   	//#endregion
+
+		//#region Lưu bài làm vào kho bài trắc nghiệm
+		const SUBMIT_PATH = process.env['PAPER_TEST_PATH']
+		const FILE_PATH = SUBMIT_PATH + '/' + NEW_SUBMISSION_UUID
+		fs.writeFileSync(FILE_PATH, theFile.data);
+		//#endregion
+
+		req.api.sendSuccess({ submission_id: NEW_SUBMISSION_UUID });
+
+		//#region Tiến hành chấm bài (trên một luồng riêng)
+		evaluate(examId, NEW_SUBMISSION_UUID)
+		//#endregion
+	}
+))
 

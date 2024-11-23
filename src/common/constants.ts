@@ -260,6 +260,11 @@ export const API_EXAM= {
 		method: 'post',
 		roles: HIGHER_ROLES
 	},
+	EXAM_PAPER_CREATE: {
+		url: '/api/exam/create/paper',
+		method: 'post',
+		roles: HIGHER_ROLES
+	},
 	EXAM__DELETE: {
 		url: '/api/exam/delete',
 		method: 'post',
@@ -305,6 +310,13 @@ export const API_SUBMISSION = {
 		method: 'post',
 		roles: AUTHENTICATED_ROLES
 	},
+
+	SUBMISSION_PAPER: {
+		url: '/api/submission/paper',
+		method: 'post',
+		roles: AUTHENTICATED_ROLES
+	},
+
 	SUBMISSION__LIST: {
 		url: '/api/submission/list',
 		method: 'get',
