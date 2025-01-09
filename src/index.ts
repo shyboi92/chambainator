@@ -6,10 +6,8 @@ import chalk from 'chalk';
 import cron from 'node-cron';
 
 import utils from './inc/utils.js';
-import * as config from './inc/config.js';
 
 import {initWebServer} from './inc/server-web.js';
-import {initWSServer} from './inc/server-ws.js';
 
 
 dotenv.config();
@@ -24,7 +22,7 @@ utils.prepareFolder(process.env.EXE_PATH!)
 utils.prepareFolder(process.env.PAPER_TEST_PATH!)
 
 
-cron.schedule('1 0 * * 0', () => {	// 1:00 every Sunday
+// cron.schedule('1 0 * * 0', () => {	// 1:00 every Sunday
 	// console.log('Creating backup...');
 	// backup.createBackup();
 
@@ -43,7 +41,7 @@ cron.schedule('1 0 * * 0', () => {	// 1:00 every Sunday
 	// const uploadPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_UPLOAD);
 	// console.log(`Cleaning up: ${uploadPath}`);
 	// utils.cleanOldFiles(uploadPath, config.UPLOAD_FILES_MAX_AGE_DAYS * 3600 * 24, true);
-});
+// });
 
 
 
@@ -62,7 +60,6 @@ const httpServer = (() => {
 
 
 initWebServer(httpServer);
-initWSServer(httpServer);
 
 
 const port = process.env.WEB_LOCAL_PORT ?? 5700;

@@ -2,17 +2,13 @@
   "name": "chambainator",
   "type": "module",
   "version": "0.2.0",
-  "description": "",
   "scripts": {
     "dev:build": "tsc -b tsconfig.dev.json",
     "dev:watch": "tsc -b tsconfig.dev.json -w",
     "dev:start": "cross-env NODE_ENV=development nodemon dist-dev/index.js",
     "dev": "concurrently npm:dev:watch npm:dev:start",
     "build": "tsc -b tsconfig.prod.json",
-    "start": "cross-env NODE_ENV=production node dist-prod/index.js",
-    "test": "jest",
-    "db:cli": "node dist-dev/scripts/db-cli.js",
-    "db:dump": "node dist-dev/scripts/db-dump.js"
+    "start": "cross-env NODE_ENV=production node dist-prod/index.js"
   },
   "dependencies": {
     "@dodona/dolos": "^2.8.0",
@@ -46,9 +42,14 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/session-file-store": "^1.2.5",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.9"
