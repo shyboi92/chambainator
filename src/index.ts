@@ -20,7 +20,9 @@ console.log(chalk.yellow(`Running in ${process.env.NODE_ENV} mode...`));
 
 
 utils.prepateDataFolders();
-
+utils.prepareFolder(process.env.SUBMISSION_PATH!)
+utils.prepareFolder(process.env.EXE_PATH!)
+utils.prepareFolder(process.env.PAPER_TEST_PATH!)
 
 
 cron.schedule('1 0 * * 0', () => {	// 1:00 every Sunday
