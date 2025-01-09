@@ -118,6 +118,7 @@ import routeApiClass from '../routes/api-class.js';
 import routeApiExercise from '../routes/api-exercise.js';
 import routeApiExam from '../routes/api-exam.js';
 import routeApiSubmit from '../routes/api-submit.js';
+import routeApiMct from '../routes/api-mct.js';
 
 
 app.use(process.env.WEB_LOCAL_PATH as string, routeMain);
@@ -127,6 +128,7 @@ app.use(process.env.WEB_LOCAL_PATH as string, routeApiClass);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiExercise);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiExam);
 app.use(process.env.WEB_LOCAL_PATH as string, routeApiSubmit);
+app.use(process.env.WEB_LOCAL_PATH as string, routeApiMct);
 
 
 function initWebServer(httpServer) {

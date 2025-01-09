@@ -6,7 +6,6 @@ import chalk from 'chalk';
 import cron from 'node-cron';
 
 import utils from './inc/utils.js';
-import backup from './inc/backup.js';
 import * as config from './inc/config.js';
 
 import {initWebServer} from './inc/server-web.js';
@@ -26,24 +25,24 @@ utils.prepareFolder(process.env.PAPER_TEST_PATH!)
 
 
 cron.schedule('1 0 * * 0', () => {	// 1:00 every Sunday
-	console.log('Creating backup...');
-	backup.createBackup();
+	// console.log('Creating backup...');
+	// backup.createBackup();
 
-	const backupPath = utils.getDataFilePath('', utils.DataFileTypes.BACKUP);
-	console.log('Cleaning up: ' + backupPath);
-	utils.cleanOldFiles(backupPath, config.BACKUP_FILES_MAX_AGE_DAYS * 3600 * 24);
+	// const backupPath = utils.getDataFilePath('', utils.DataFileTypes.BACKUP);
+	// console.log('Cleaning up: ' + backupPath);
+	// utils.cleanOldFiles(backupPath, config.BACKUP_FILES_MAX_AGE_DAYS * 3600 * 24);
 
-	const tmpUncategorizedPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_UNCATEGORIZED);
-	console.log(`Cleaning up: ${tmpUncategorizedPath}`);
-	utils.cleanOldFiles(tmpUncategorizedPath, config.UNCATEGORIZED_TMP_FILES_MAX_AGE_DAYS * 3600 * 24);
+	// const tmpUncategorizedPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_UNCATEGORIZED);
+	// console.log(`Cleaning up: ${tmpUncategorizedPath}`);
+	// utils.cleanOldFiles(tmpUncategorizedPath, config.UNCATEGORIZED_TMP_FILES_MAX_AGE_DAYS * 3600 * 24);
 
-	const logPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_LOG);
-	console.log(`Cleaning up: ${logPath}`);
-	utils.cleanOldFiles(logPath, config.LOG_FILES_MAX_AGE_DAYS * 3600 * 24);
+	// const logPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_LOG);
+	// console.log(`Cleaning up: ${logPath}`);
+	// utils.cleanOldFiles(logPath, config.LOG_FILES_MAX_AGE_DAYS * 3600 * 24);
 
-	const uploadPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_UPLOAD);
-	console.log(`Cleaning up: ${uploadPath}`);
-	utils.cleanOldFiles(uploadPath, config.UPLOAD_FILES_MAX_AGE_DAYS * 3600 * 24, true);
+	// const uploadPath = utils.getDataFilePath('', utils.DataFileTypes.TMP_UPLOAD);
+	// console.log(`Cleaning up: ${uploadPath}`);
+	// utils.cleanOldFiles(uploadPath, config.UPLOAD_FILES_MAX_AGE_DAYS * 3600 * 24, true);
 });
 
 
