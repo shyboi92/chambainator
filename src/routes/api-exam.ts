@@ -10,7 +10,10 @@ const router = Router();
 export default router;
 
 type MultipleChoiceAnswer = 'A' | 'B' | 'C' | 'D'
-
+type MultipleChoiceQuestion = {
+	question_number: number,
+	choice: MultipleChoiceAnswer
+}
 
 bindApiWithRoute(API_EXAM.EXAM__CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'class_id').notEmpty().isInt().toInt(),
@@ -101,12 +104,12 @@ bindApiWithRoute(API_EXAM.EXAM_PAPER_CREATE, api => apiRoute(router, api,
 		req.ctx.logActivity('Tạo bài thi trên giấy mới', { exam_id: newExamId });
 		req.api.sendSuccess({ exam_id: newExamId });
 
-		const questionIds = req.api.params.answers
-		questionIds.forEach((choice: MultipleChoiceAnswer, index: number) => {
+		const questionIds = req.api.params.answers as MultipleChoiceQuestion[];
+		questionIds.forEach((q) => {
 			db.insert('paper_test_answer', {
-				question_id: index,
+				question_id: q.question_number,
 				exam_id: newExamId,
-				choice
+				choice: q.choice
 			})
 		});
 	}
@@ -361,4 +364,4 @@ bindApiWithRoute(API_EXAM.EXAM__LIST__ALL, api => apiRoute(router, api,
 
 			req.api.sendSuccess({ exam: finalResult })
 		}
-	}))
+}))

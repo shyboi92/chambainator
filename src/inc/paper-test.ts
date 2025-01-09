@@ -7,20 +7,23 @@ export async function evaluate(examId: number, uuid: string) {
     const submitPath = process.env['PAPER_TEST_PATH']
     const imagePath = submitPath + '/' + uuid
 
-    const output = execFileSync('/root/auto_score.py', [imagePath], {
+    const output = execFileSync('/root/Auto-Scores-National-Multiple-Choice-Test/env/bin/python', ['/root/auto_score.py', imagePath], {
         encoding: 'utf-8',
+        env: {
+            "TF_CPP_MIN_LOG_LEVEL": '3'
+        }
     })
     const resultJson: { [key: string]: Answer[] } = JSON.parse(output);
 
     // Lấy danh sách đáp án đúng của đề thi này
-    const correctAnswersSql = await db.query("SELECT question_id, choice FROM paper_test_answer WHERE exam_id = ?", [examId]) as {
-        question_id: number,
+    const correctAnswersSql = await db.query("SELECT question_number, choice FROM paper_test_answer WHERE exam_id = ?", [examId]) as {
+        question_number: number,
         choice: Answer
     }[]
 
     
     const correctAnswers = Array<Answer | null>(correctAnswersSql.length).fill(null)
-    correctAnswersSql.forEach(q => correctAnswers[q.question_id] = q.choice)
+    correctAnswersSql.forEach(q => correctAnswers[q.question_number] = q.choice)
     
     if (correctAnswers.every(v => v === null)) {
         throw new Error("Đề thi này chưa được lập bảng đáp án đúng.")
