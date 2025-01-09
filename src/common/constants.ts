@@ -200,7 +200,7 @@ export const API_CLASS= {
 	},
 }
 
-export const API_EXERCISE= {
+export const API_EXERCISE = {
 	EXERCISE__CREATE: {
 		url: '/api/exercise/create',
 		method: 'post',
@@ -343,6 +343,14 @@ export const API_SUBMISSION = {
 		method: 'get',
 		roles: AUTHENTICATED_ROLES
 	}
+}
+
+export const API_MCT = {
+	QUESTION_CREATE: {
+		url: '',
+		method: 'post',
+		roles: AUTHENTICATED_ROLES
+	},
 }
 
 export interface UserInfo {
