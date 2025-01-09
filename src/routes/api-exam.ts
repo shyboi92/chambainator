@@ -74,7 +74,7 @@ bindApiWithRoute(API_EXAM.EXAM_PAPER_CREATE, api => apiRoute(router, api,
 	apiValidatorParam(api, 'description').trim().optional(),
 	apiValidatorParam(api, 'start_date').notEmpty().isISO8601().toDate(),
 	apiValidatorParam(api, 'end_date').notEmpty().isISO8601().toDate(),
-	apiValidatorParam(api, 'answers').isArray().toArray(),
+	// apiValidatorParam(api, 'answers').isArray().toArray(),
 
 	async (req: ApiRequest, res: Response) => {
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
@@ -104,14 +104,14 @@ bindApiWithRoute(API_EXAM.EXAM_PAPER_CREATE, api => apiRoute(router, api,
 		req.ctx.logActivity('Tạo bài thi trên giấy mới', { exam_id: newExamId });
 		req.api.sendSuccess({ exam_id: newExamId });
 
-		const questionIds = req.api.params.answers as MultipleChoiceQuestion[];
-		questionIds.forEach((q) => {
-			db.insert('paper_test_answer', {
-				question_id: q.question_number,
-				exam_id: newExamId,
-				choice: q.choice
-			})
-		});
+		// const questionIds = req.api.params.answers as MultipleChoiceQuestion[];
+		// questionIds.forEach((q) => {
+		// 	db.insert('paper_test_answer', {
+		// 		question_id: q.question_number,
+		// 		exam_id: newExamId,
+		// 		choice: q.choice
+		// 	})
+		// });
 	}
 ))
 
@@ -147,7 +147,7 @@ bindApiWithRoute(API_EXAM.EXAM__DELETE, api => apiRoute(router, api,
         await db.query("DELETE FROM exam_cont WHERE exam_id = ?", [req.api.params.exam_id]);
 
         await db.query("DELETE FROM exam WHERE id = ?", [req.api.params.exam_id]);
-		
+
 		req.api.sendSuccess();
 	}
 ))
@@ -230,7 +230,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 			console.log("exam qq", req.api.params.exam_id);
 			console.log("useinfoid", userInfo.id);
 			console.log("class_id la ", classId);
-			
+
 			const studentId = querystudent[0]['id'];
 
 			const examconIds = examData.map(row => row.id);
