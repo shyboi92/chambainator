@@ -339,7 +339,7 @@ export const API_SUBMISSION = {
 
 export const API_MCT = {
 	QUESTION_CREATE: {
-		url: "",
+		url: "/api/mct/question",
 		method: "post",
 		roles: AUTHENTICATED_ROLES,
 	},
