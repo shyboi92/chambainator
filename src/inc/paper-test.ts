@@ -4,61 +4,61 @@ import db from '../inc/database.js';
 type Answer = 'A' | 'B' | 'C' | 'D'
 
 export async function evaluate(examId: number, uuid: string) {
-    const submitPath = process.env['PAPER_TEST_PATH']
-    const imagePath = submitPath + '/' + uuid
+	const submitPath = process.env['PAPER_TEST_PATH']
+	const imagePath = submitPath + '/' + uuid
 
-    const output = execFileSync('/root/Auto-Scores-National-Multiple-Choice-Test/env/bin/python', ['/root/auto_score.py', imagePath], {
-        encoding: 'utf-8',
-        env: {
-            "TF_CPP_MIN_LOG_LEVEL": '3'
-        }
-    })
-    const resultJson: { [key: string]: Answer[] } = JSON.parse(output);
+	const output = execFileSync('/root/Auto-Scores-National-Multiple-Choice-Test/env/bin/python', ['/root/auto_score.py', imagePath], {
+		encoding: 'utf-8',
+		env: {
+			"TF_CPP_MIN_LOG_LEVEL": '3'
+		}
+	})
+	const resultJson: { [key: string]: Answer[] } = JSON.parse(output);
 
-    // Lấy danh sách đáp án đúng của đề thi này
-    const correctAnswersSql = await db.query("SELECT question_number, choice FROM paper_test_answer WHERE exam_id = ?", [examId]) as {
-        question_number: number,
-        choice: Answer
-    }[]
+	// Lấy danh sách đáp án đúng của đề thi này
+	const correctAnswersSql = await db.query("SELECT question_number, choice FROM paper_test_answer WHERE exam_id = ?", [examId]) as {
+		question_number: number,
+		choice: Answer
+	}[]
 
-    
-    const correctAnswers = Array<Answer | null>(correctAnswersSql.length).fill(null)
-    correctAnswersSql.forEach(q => correctAnswers[q.question_number] = q.choice)
-    
-    if (correctAnswers.every(v => v === null)) {
-        throw new Error("Đề thi này chưa được lập bảng đáp án đúng.")
-    }
 
-    const studentAnswers = Array<Answer | null>(correctAnswers.length).fill(null)
-    Object.entries(resultJson).forEach(([qNo, choices]) => {
-        if (choices.length == 1)
-            studentAnswers[Number(qNo)] = choices[0]
-    })
+	const correctAnswers = Array<Answer | null>(correctAnswersSql.length).fill(null)
+	correctAnswersSql.forEach(q => correctAnswers[q.question_number] = q.choice)
 
-    // Tạo mảng kết quả chấm (đúng/sai/không có đáp án) và điền giá trị
-    // dựa vào hai cái trên
+	if (correctAnswers.every(v => v === null)) {
+		throw new Error("Đề thi này chưa được lập bảng đáp án đúng.")
+	}
 
-    const result = correctAnswers.map((q, qNo) => {
-        if (q) {
-            return q == studentAnswers[qNo]
-        }
+	const studentAnswers = Array<Answer | null>(correctAnswers.length).fill(null)
+	Object.entries(resultJson).forEach(([qNo, choices]) => {
+		if (choices.length == 1)
+			studentAnswers[Number(qNo)] = choices[0]
+	})
 
-        return null;
-    });
+	// Tạo mảng kết quả chấm (đúng/sai/không có đáp án) và điền giá trị
+	// dựa vào hai cái trên
 
-    // Chấm điểm
-    // (là tỷ lệ đáp án đúng trên tổng số những cái có đáp án)
+	const result = correctAnswers.map((q, qNo) => {
+		if (q) {
+			return q == studentAnswers[qNo]
+		}
 
-    const baseScore = 10        // Thang điểm
-    let correctCount = 0, totalCount = 0
-    result.forEach((a) => {
-        if (a !== null) {
-            totalCount++
-            if (a) correctCount++
-        }
-    });
+		return null;
+	});
 
-    const finalScore = baseScore * (correctCount / totalCount)
-    await db.query("UPDATE paper_submission SET score = ? WHERE uuid = ?", [finalScore, uuid])
+	// Chấm điểm
+	// (là tỷ lệ đáp án đúng trên tổng số những cái có đáp án)
+
+	const baseScore = 10        // Thang điểm
+	let correctCount = 0, totalCount = 0
+	result.forEach((a) => {
+		if (a !== null) {
+			totalCount++
+			if (a) correctCount++
+		}
+	});
+
+	const finalScore = baseScore * (correctCount / totalCount)
+	await db.query("UPDATE paper_submission SET score = ? WHERE uuid = ?", [finalScore, uuid])
 	console.info(`Đã cập nhật điểm của bài làm trắc nghiệm ${uuid}, bài đạt ${finalScore}/${baseScore} điểm.`)
 }
