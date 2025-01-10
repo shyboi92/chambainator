@@ -157,6 +157,7 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 		const userInfo = await req.ctx.getUser()?.getInfo() as UserInfo;
 
 		let responseData;
+
 		const queryResult = await db.query(
 			"SELECT name, description, start_date, end_date FROM exam WHERE id = ?",
 			[req.api.params.exam_id]
@@ -169,20 +170,20 @@ bindApiWithRoute(API_EXAM.EXAM__GET, api => apiRoute(router, api,
 		if (!AUTHENTICATED_ROLES.includes(userInfo.role)) {
 			return req.api.sendError(ErrorCodes.INVALID_PARAMETERS);
 		}
+
 		if (userInfo.role == Roles.STUDENT) {
 
 			const queryclass = await db.query("SELECT class_id FROM exam WHERE id = ?", [req.api.params.exam_id]);
 			const classId = queryclass[0]['class_id'];
 			const querystudent = await db.query("SELECT id FROM student WHERE user_id = ? AND class_id = ?", [userInfo.id, classId]);
 
-			console.log("exam qq", req.api.params.exam_id);
-			console.log("useinfoid", userInfo.id);
-			console.log("class_id la ", classId);
+			// console.log("exam qq", req.api.params.exam_id);
+			// console.log("useinfoid", userInfo.id);
+			// console.log("class_id la ", classId);
 
 			const studentId = querystudent[0]['id'];
 
 			const examconIds = examData.map(row => row.id);
-			const examContPlaceholders = examconIds.map(() => '?').join(',');
 
 			const submissionMap = {};
 			for (const questionId of examconIds) {

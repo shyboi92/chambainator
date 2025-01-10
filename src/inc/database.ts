@@ -1,11 +1,8 @@
 import { Connection, createConnection } from 'mysql2';
 import moment from 'moment';
 
-
-
 let conn: Connection | null = null;
 let connectionPromise: Promise<void> | null = null;
-
 
 const MYSQL_ERRCODES__PROTOCOL_CONNECTION_LOST = ['PROTOCOL_CONNECTION_LOST', 4031];
 
@@ -35,7 +32,7 @@ function connect() {
 	connectionPromise = new Promise<void>((resolve, reject) => {
 		__conn.connect(err => {
 			connectionPromise = null;
-			
+
 			if (err) reject(err);
 			else {
 				conn = __conn;
@@ -105,8 +102,7 @@ async function insert(tableName: string, params: object | object[]) {
 async function updateRow(tableName: string, id: number, params: object) {
 	const keys = Object.keys(params);
 	const placeholders = keys.map(e => `\`${e}\` = ?`).join(',');
-	return query(`update ${tableName} set ${placeholders} where id = ?`,
-		[...Object.values(params), id]);
+	return query(`update ${tableName} set ${placeholders} where id = ?`, [...Object.values(params), id]);
 }
 
 
