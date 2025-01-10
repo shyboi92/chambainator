@@ -138,3 +138,70 @@ bindApiWithRoute(API_EXAM.EXAM_PAPER_CREATE, (api) =>
 		}
 	)
 );
+
+bindApiWithRoute(API_MCT.QUESTION_GET, (api) =>
+	apiRoute(
+		router,
+		api,
+
+		apiValidatorParam(api, "exam_id").isInt().toInt(),
+
+		async (req: ApiRequest) => {
+			const sql1 = (await db.query(
+				`SELECT
+					qem.id,
+					qem.question_index,
+					qem.question_id,
+					q.description
+				FROM paper_exam_mapping qem
+				JOIN exercise q ON q.id = qem.question_id
+				WHERE exam_id = ?`,
+				[req.api.params.exam_id as number]
+			)) as any[];
+
+			const questions: {
+				mappingId: number;
+				id: number;
+				index: number;
+				content: string;
+				answers: {
+					id: number;
+					index: MultipleChoiceAnswer;
+					content: string;
+					correct: boolean;
+				}[];
+			}[] = [];
+
+			await Promise.all(
+				sql1.map(async (q) => {
+					const sql2 = (await db.query(
+						`SELECT
+							qam.answer_index,
+							qam.answer_id,
+							a.content,
+							a.correct
+						FROM paper_exam_qa_mapping qam
+						JOIN paper_question_answer a ON qam.answer_id = a.id
+						WHERE exam_mapping_id = ?`,
+						[q.id]
+					)) as any[];
+
+					questions.push({
+						mappingId: q.id,
+						index: q.question_index,
+						id: q.question_id,
+						content: q.description,
+						answers: sql2.map(a => ({
+							id: a.answer_id,
+							content: a.content,
+							correct: a.correct,
+							index: a.answer_index
+						}))
+					});
+				})
+			);
+
+			req.api.sendSuccess(questions);
+		}
+	)
+);

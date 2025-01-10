@@ -341,8 +341,13 @@ export const API_MCT = {
 	QUESTION_CREATE: {
 		url: "/api/mct/question",
 		method: "post",
-		roles: AUTHENTICATED_ROLES,
+		roles: HIGHER_ROLES,
 	},
+	QUESTION_GET: {
+		url: "/api/mct/exam",
+		method: "get",
+		roles: AUTHENTICATED_ROLES
+	}
 };
 
 export interface UserInfo {
